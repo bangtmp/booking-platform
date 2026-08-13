@@ -34,6 +34,7 @@ const serviceInputSchema = z.object({
     .number()
     .int("Giá phải là số nguyên (VNĐ).")
     .nonnegative("Giá không được nhỏ hơn 0.")
+    .multipleOf(1000, "Giá phải là bội số của 1.000 VNĐ.")
     .max(999_999_999_999, "Giá vượt quá giới hạn."),
   isActive: z.boolean().optional(),
 });
@@ -77,7 +78,7 @@ export async function createService(raw: ServiceInput): Promise<ServiceActionRes
       name: input.name,
       durationMin: input.durationMin,
       price: input.price,
-      isActive: input.isActive ?? true,
+      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     },
   });
 
@@ -101,7 +102,7 @@ export async function updateService(
       name: input.name,
       durationMin: input.durationMin,
       price: input.price,
-      isActive: input.isActive ?? true,
+      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     },
   });
   if (res.count === 0) return { ok: false, error: "Dịch vụ không tồn tại." };
@@ -137,19 +138,21 @@ export async function toggleServiceActive(
  * service that already has bookings can't be removed — Prisma raises P2003 and
  * we surface a friendly message. Deleting a booking-less service removes it
  * from both the dashboard and the public page.
+ *
+ * deleteMany is atomic AND tenant-scoped, so there is no check-then-delete race:
+ * a concurrent delete/toggle from another tab simply makes count 0 (friendly
+ * "not found") instead of throwing P2025, and a row from another tenant can
+ * never be touched. P2003 (Restrict) is still raised on deleteMany and mapped.
  */
 export async function deleteService(id: string): Promise<ServiceActionResult> {
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 
-  const existing = await prisma.service.findFirst({
-    where: { id, tenantId: scope.tenantId },
-    select: { id: true },
-  });
-  if (!existing) return { ok: false, error: "Dịch vụ không tồn tại." };
-
   try {
-    await prisma.service.delete({ where: { id } });
+    const res = await prisma.service.deleteMany({
+      where: { id, tenantId: scope.tenantId },
+    });
+    if (res.count === 0) return { ok: false, error: "Dịch vụ không tồn tại." };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2003") {
       return { ok: false, error: "Dịch vụ này đã có lịch hẹn, không thể xóa." };

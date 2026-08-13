@@ -160,16 +160,21 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
   ) {
     setPendingId(id);
     setMessage(null);
-    const res = await action();
-    setPendingId(null);
-    setBusy(false);
-    if (res.ok) {
-      setMode(null);
-      setConfirmingDeleteId(null);
-      setMessage({ kind: "success", text: successText });
-      router.refresh();
-    } else {
-      setMessage({ kind: "error", text: res.error });
+    try {
+      const res = await action();
+      if (res.ok) {
+        setMode(null);
+        setConfirmingDeleteId(null);
+        setMessage({ kind: "success", text: successText });
+        router.refresh();
+      } else {
+        setMessage({ kind: "error", text: res.error });
+      }
+    } catch {
+      setMessage({ kind: "error", text: "Đã xảy ra lỗi, vui lòng thử lại." });
+    } finally {
+      setPendingId(null);
+      setBusy(false);
     }
   }
 
@@ -233,7 +238,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
 
       {message && (
         <div
-          role="status"
+          role={message.kind === "error" ? "alert" : "status"}
           className={`rounded-xl px-3 py-2 text-sm ${
             message.kind === "error"
               ? "bg-red-50 text-red-600"
