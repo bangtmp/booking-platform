@@ -201,7 +201,7 @@ export default function WeekCalendar({
       ) : (
         <div className="overflow-x-auto rounded-xl border border-blush-border bg-white shadow-sm">
           <div
-            className="grid min-w-[1050px]"
+            className="grid"
             style={{ gridTemplateColumns: "150px repeat(7, minmax(190px, 1fr))" }}
           >
             <div className="sticky left-0 z-10 border-b border-blush-border bg-white px-3 py-2 text-xs font-semibold text-zinc-500">
@@ -291,14 +291,16 @@ export default function WeekCalendar({
                                   </div>
                                   {b.status === "PENDING" && (
                                     <div className="mt-1.5 flex flex-wrap gap-1">
-                                      <button
-                                        type="button"
-                                        disabled={acting !== null}
-                                        onClick={() => act(b.id, "CONFIRMED")}
-                                        className={`${actionBtn} ${primaryBtn}`}
-                                      >
-                                        Duyệt
-                                      </button>
+                                      {confirmMode === "MANUAL" && (
+                                        <button
+                                          type="button"
+                                          disabled={acting !== null}
+                                          onClick={() => act(b.id, "CONFIRMED")}
+                                          className={`${actionBtn} ${primaryBtn}`}
+                                        >
+                                          Duyệt
+                                        </button>
+                                      )}
                                       <button
                                         type="button"
                                         disabled={acting !== null}

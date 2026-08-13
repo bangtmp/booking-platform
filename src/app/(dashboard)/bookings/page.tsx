@@ -29,7 +29,19 @@ function mondayOf(date: string): string {
 
 function parseWeekStart(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  if (
+    date.getUTCFullYear() !== y ||
+    date.getUTCMonth() !== mo - 1 ||
+    date.getUTCDate() !== d
+  ) {
+    return null;
+  }
   return mondayOf(raw);
 }
 
