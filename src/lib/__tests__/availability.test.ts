@@ -13,7 +13,7 @@ const MONDAY = '2026-08-17';
 const TUESDAY = '2026-08-18';
 const SUNDAY = '2026-08-23';
 
-const schedule = (dayOfWeek: number, startTime: string, endTime: string, extra: Partial<{ breakStart: string; breakEnd: string; active: boolean }> = {}) => ({
+const schedule = (dayOfWeek: number, startTime: string, endTime: string, extra: Partial<{ breakStart: string | null; breakEnd: string | null; active: boolean }> = {}) => ({
   dayOfWeek,
   startTime,
   endTime,
@@ -191,6 +191,21 @@ describe('getDaySlots', () => {
 
   it('honours schedule.active=false as no availability', () => {
     expect(getDaySlots({ date: MONDAY, schedule: schedule(1, '09:00', '17:00', { active: false }), serviceMinutes: 30 })).toEqual([]);
+  });
+
+  it('treats null breakStart/breakEnd as no break', () => {
+    const slots = getDaySlots({
+      date: MONDAY,
+      schedule: schedule(1, '09:00', '12:00', { breakStart: null, breakEnd: null }),
+      serviceMinutes: 30,
+    });
+    expect(slots).toEqual(['09:00', '09:30', '10:00', '10:30', '11:00', '11:30']);
+    const mixed = getDaySlots({
+      date: MONDAY,
+      schedule: schedule(1, '09:00', '12:00', { breakStart: null, breakEnd: '10:30' }),
+      serviceMinutes: 30,
+    });
+    expect(mixed).toEqual(['09:00', '09:30', '10:00', '10:30', '11:00', '11:30']);
   });
 
   it('uses a configurable stepMinutes', () => {

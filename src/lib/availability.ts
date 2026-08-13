@@ -8,7 +8,8 @@
  * - Dates are "YYYY-MM-DD" strings; dayOfWeek uses the UTC calendar so the
  *   result is identical in any server timezone (0=Sunday .. 6=Saturday).
  * - Schedules do NOT cross midnight (startTime <= endTime, endTime may be
- *   "24:00").
+ *   "24:00"). Bookings are also assumed non-midnight-crossing: a booking
+ *   interval with end <= start is silently ignored in overlap checks.
  * - Slots are half-open intervals [start, end). A slot ending exactly when
  *   a booking/break starts, or starting exactly when one ends, is free.
  * - Slot starts snap to the step grid (default 30 min) from midnight, so a
@@ -22,8 +23,8 @@ export interface ScheduleInput {
   dayOfWeek: number;
   startTime: string;
   endTime: string;
-  breakStart?: string;
-  breakEnd?: string;
+  breakStart?: string | null;
+  breakEnd?: string | null;
   active?: boolean;
 }
 
@@ -128,6 +129,7 @@ export function generateSlots(
 ): string[] {
   const start = parseTime(dayStart);
   const end = parseTime(dayEnd);
+  if (durationMinutes <= 0) throw new Error(`serviceMinutes must be positive (got ${durationMinutes})`);
   if (stepMinutes <= 0) throw new Error(`stepMinutes must be positive (got ${stepMinutes})`);
   const slots: string[] = [];
   let cursor = Math.ceil(start / stepMinutes) * stepMinutes;
@@ -152,6 +154,7 @@ export function availableSlots(
 ): string[] {
   const bookedMinutes = booked
     .map((b) => ({ start: parseTime(b.start), end: parseTime(b.end) }))
+    // Bookings are assumed non-midnight-crossing; ignore malformed intervals (end <= start).
     .filter((b) => b.end > b.start);
   return generateSlots(dayStart, dayEnd, durationMinutes, stepMinutes).filter((slot) => {
     const s = parseTime(slot);
@@ -183,8 +186,8 @@ export function getDaySlots(options: GetDaySlotsOptions): string[] {
   for (const schedule of schedules) {
     const intervals = [...blocked];
     if (
-      schedule.breakStart !== undefined &&
-      schedule.breakEnd !== undefined &&
+      schedule.breakStart != null &&
+      schedule.breakEnd != null &&
       parseTime(schedule.breakStart) < parseTime(schedule.breakEnd)
     ) {
       intervals.push({ start: schedule.breakStart, end: schedule.breakEnd });
@@ -209,6 +212,11 @@ function toDateString(utcDate: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * First `limit` dates (default 7) in [dateRangeStart, dateRangeEnd] with >= 1 free slot.
+ * The caller must supply `dateRangeEnd` (e.g. start + 30 days) for the "next available"
+ * UX — the range is never extended here.
+ */
 export function findAvailability(options: FindAvailabilityOptions): string[] {
   const {
     dateRangeStart,
@@ -238,6 +246,10 @@ export function findAvailability(options: FindAvailabilityOptions): string[] {
   return results;
 }
 
+/**
+ * Per-date slot lists for one staff across [dateRangeStart, dateRangeEnd].
+ * Days with no free slot are omitted from the result (no `slots: []` entries).
+ */
 export function getStaffAvailability(options: StaffAvailabilityOptions): StaffDayAvailability[] {
   const {
     staffId,
