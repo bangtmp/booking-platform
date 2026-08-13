@@ -44,11 +44,11 @@ export default function RegisterPage() {
 
     const signIn = await authClient.signIn.email({ email, password });
     if (signIn.error) {
-      setError(
-        signIn.error.message ?? "Đăng ký thành công nhưng đăng nhập thất bại.",
-      );
-      setLoading(false);
-      return;
+      const retry = await authClient.signIn.email({ email, password });
+      if (retry.error) {
+        router.push(`/login?registered=${encodeURIComponent(email)}`);
+        return;
+      }
     }
 
     router.push("/");

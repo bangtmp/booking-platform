@@ -60,9 +60,6 @@ export async function registerTenant(
   const businessType = raw.businessType as $Enums.TenantBusinessType;
   const baseSlug = slugify(tenantName);
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) return { ok: false, error: "Email đã được sử dụng." };
-
   for (let attempt = 0; attempt < 8; attempt++) {
     const slug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
     try {
@@ -101,7 +98,7 @@ export async function registerTenant(
       ) {
         const target = e.meta?.target as string[] | undefined;
         if (target?.includes("slug")) continue;
-        return { ok: false, error: "Email đã được sử dụng." };
+        return { ok: false, error: "Đã xảy ra lỗi, vui lòng thử lại." };
       }
       console.error("registerTenant error", e);
       return { ok: false, error: "Đã xảy ra lỗi, vui lòng thử lại." };
