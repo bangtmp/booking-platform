@@ -10,6 +10,16 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-playfair);
+}
+
+@theme {
+  --color-primary: #ec4899;
+  --color-primary-deep: #db2777;
+  --color-accent: #8b5cf6;
+  --color-blush: #fdf2f8;
+  --color-blush-border: #fbcee8;
+  --color-mist: #f1eef5;
 }
 
 @media (prefers-color-scheme: dark) {
