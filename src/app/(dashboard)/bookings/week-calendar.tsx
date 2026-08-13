@@ -291,16 +291,14 @@ export default function WeekCalendar({
                                   </div>
                                   {b.status === "PENDING" && (
                                     <div className="mt-1.5 flex flex-wrap gap-1">
-                                      {confirmMode === "MANUAL" && (
-                                        <button
-                                          type="button"
-                                          disabled={acting !== null}
-                                          onClick={() => act(b.id, "CONFIRMED")}
-                                          className={`${actionBtn} ${primaryBtn}`}
-                                        >
-                                          Duyệt
-                                        </button>
-                                      )}
+                                      <button
+                                        type="button"
+                                        disabled={acting !== null}
+                                        onClick={() => act(b.id, "CONFIRMED")}
+                                        className={`${actionBtn} ${primaryBtn}`}
+                                      >
+                                        Duyệt
+                                      </button>
                                       <button
                                         type="button"
                                         disabled={acting !== null}

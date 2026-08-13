@@ -49,11 +49,11 @@ function firstIssue(error: z.ZodError): string {
 /**
  * The settings action can change anything that affects other routes: the name
  * (shell + dashboard), the timezone (availability window "today" on every
- * route), confirmMode (new-booking status on /booking/{slug} + the Duyệt gate
- * on /bookings), and staff links (a linked STAFF account immediately sees their
- * row on /bookings). Revalidate all of them so the change is visible on the
- * next request. Slug is immutable (see page.tsx), so `scope.slug` is always the
- * correct public path.
+ * route), confirmMode (new-booking status on /booking/{slug}; PENDING rows on
+ * /bookings stay approvable regardless of mode), and staff links (a linked
+ * STAFF account immediately sees their row on /bookings). Revalidate all of
+ * them so the change is visible on the next request. Slug is immutable (see
+ * page.tsx), so `scope.slug` is always the correct public path.
  */
 function revalidateSettingsPaths(slug: string) {
   revalidatePath("/settings");
@@ -94,10 +94,13 @@ export async function updateTenantSettings(
 /**
  * Link a Staff row to a User account by email (Task 9 carry-over: the staff
  * dashboard maps Staff.userEmail to the session User.email within the tenant).
- * Requirements per task brief: the email must exist as a User account, and it
- * must not already be linked to another staff in this tenant. The second rule
- * is enforced by the @@unique([tenantId, userEmail]) constraint — a crafted
- * double-link raises P2002, which we map to a friendly error.
+ * Requirements per task brief: the email must exist as a User account, it must
+ * belong to THIS tenant and be a STAFF role account (linking an OWNER/ADMIN or
+ * another tenant's user would create an inert link — the staff dashboard only
+ * resolves STAFF sessions inside the same tenant), and it must not already be
+ * linked to another staff in this tenant. The last rule is enforced by the
+ * @@unique([tenantId, userEmail]) constraint — a crafted double-link raises
+ * P2002, which we map to a friendly error.
  */
 export async function linkStaffEmail(
   raw: { staffId: string; email: string },
@@ -117,13 +120,19 @@ export async function linkStaffEmail(
 
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true },
+    select: { id: true, tenantId: true, role: true },
   });
   if (!user) {
     return {
       ok: false,
       error: "Không tìm thấy tài khoản với email này. Nhân viên phải đăng ký tài khoản trước khi liên kết.",
     };
+  }
+  if (user.tenantId !== scope.tenantId) {
+    return { ok: false, error: "Tài khoản này không thuộc cơ sở của bạn." };
+  }
+  if (user.role !== "STAFF") {
+    return { ok: false, error: "Tài khoản này không phải là tài khoản nhân viên." };
   }
 
   try {
