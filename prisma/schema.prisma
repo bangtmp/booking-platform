@@ -126,12 +126,19 @@ model Staff {
   tenantId  String
   tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name      String
+  // Link to a STAFF User's email so the dashboard can scope "bookings of mine".
+  // A staff row with no userEmail is never matched to a logged-in STAFF user.
+  // (Task 9: schema had no User<->Staff link; the decision was email-based
+  // matching because the email is globally unique and tenant-scoped lookups
+  // make cross-tenant collisions impossible.)
+  userEmail String?
   isActive  Boolean    @default(true)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   schedules Schedule[]
   bookings  Booking[]
 
+  @@unique([tenantId, userEmail])
   @@index([tenantId])
 }
 

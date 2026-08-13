@@ -70,6 +70,33 @@ async function main() {
     },
   });
 
+  // Demo STAFF account used to verify "bookings of mine" scoping (Task 9).
+  const staffPassword = await hashPassword("staff123");
+  const staffUser = await prisma.user.upsert({
+    where: { email: "staff@demo.com" },
+    update: { role: "STAFF", tenantId: tenant.id },
+    create: {
+      email: "staff@demo.com",
+      name: "Nhân viên test",
+      role: "STAFF",
+      tenantId: tenant.id,
+      emailVerified: true,
+    },
+  });
+
+  await prisma.account.upsert({
+    where: {
+      providerId_accountId: { providerId: "credential", accountId: staffUser.id },
+    },
+    update: { password: staffPassword },
+    create: {
+      providerId: "credential",
+      accountId: staffUser.id,
+      userId: staffUser.id,
+      password: staffPassword,
+    },
+  });
+
   await prisma.service.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.staff.deleteMany({ where: { tenantId: tenant.id } });
 
@@ -86,9 +113,15 @@ async function main() {
   );
 
   const staff = await Promise.all(
-    ["Lan", "Hùng"].map((name) =>
+    [
+      { name: "Lan", userEmail: null },
+      { name: "Hùng", userEmail: null },
+      // Linked to the STAFF demo account above (staff@demo.com) so the staff
+      // dashboard view has an "own bookings" scope to verify against.
+      { name: "Test NV", userEmail: "staff@demo.com" },
+    ].map((s) =>
       prisma.staff.create({
-        data: { name, tenantId: tenant.id },
+        data: { name: s.name, userEmail: s.userEmail, tenantId: tenant.id },
       }),
     ),
   );
