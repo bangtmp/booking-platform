@@ -97,6 +97,9 @@ async function main() {
     },
   });
 
+  // Bookings reference staff/services with Restrict — drop this tenant's
+  // bookings first so the seed stays re-runnable after e2e/dev created rows.
+  await prisma.booking.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.service.deleteMany({ where: { tenantId: tenant.id } });
   await prisma.staff.deleteMany({ where: { tenantId: tenant.id } });
 
@@ -141,6 +144,75 @@ async function main() {
         }),
       );
     }
+  }
+
+  // MANUAL tenant for E2E: new public bookings stay PENDING (confirmMode
+  // MANUAL) so the owner "Duyệt" flow can be tested end-to-end. The PENDING
+  // booking itself is created by the e2e test through the public UI — that
+  // keeps the seeded data date-agnostic (no timezone drift between seed time
+  // and test run).
+  const manualPassword = await hashPassword("manual123");
+  const manualTenant = await prisma.tenant.upsert({
+    where: { slug: "manual" },
+    update: {},
+    create: {
+      slug: "manual",
+      name: "Salon Thử Nghiệm",
+      businessType: "SALON",
+      confirmMode: "MANUAL",
+      timezone: "Asia/Ho_Chi_Minh",
+    },
+  });
+
+  const manualOwner = await prisma.user.upsert({
+    where: { email: "manual@demo.com" },
+    update: { role: "OWNER", tenantId: manualTenant.id },
+    create: {
+      email: "manual@demo.com",
+      name: "Chủ cơ sở thủ công",
+      role: "OWNER",
+      tenantId: manualTenant.id,
+      emailVerified: true,
+    },
+  });
+
+  await prisma.account.upsert({
+    where: {
+      providerId_accountId: { providerId: "credential", accountId: manualOwner.id },
+    },
+    update: { password: manualPassword },
+    create: {
+      providerId: "credential",
+      accountId: manualOwner.id,
+      userId: manualOwner.id,
+      password: manualPassword,
+    },
+  });
+
+  // Bookings reference staff/services with Restrict — drop this tenant's
+  // bookings first so the seed stays re-runnable after e2e/dev created rows.
+  await prisma.booking.deleteMany({ where: { tenantId: manualTenant.id } });
+  await prisma.service.deleteMany({ where: { tenantId: manualTenant.id } });
+  await prisma.staff.deleteMany({ where: { tenantId: manualTenant.id } });
+
+  await prisma.service.create({
+    data: { name: "Cắt tóc", price: 150000, durationMin: 30, tenantId: manualTenant.id },
+  });
+
+  const manualStaff = await prisma.staff.create({
+    data: { name: "NV Manual", userEmail: null, tenantId: manualTenant.id },
+  });
+
+  for (let dayOfWeek = 1; dayOfWeek <= 6; dayOfWeek++) {
+    await prisma.schedule.create({
+      data: {
+        tenantId: manualTenant.id,
+        staffId: manualStaff.id,
+        dayOfWeek,
+        startTime: "09:00",
+        endTime: "18:00",
+      },
+    });
   }
 
   const counts = {
