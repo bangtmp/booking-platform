@@ -142,31 +142,48 @@ export async function saveSchedule(
     seen.add(row.dayOfWeek);
   }
 
+  // Which days already have a row? Days that exist are always updated (even
+  // to `active: false` — closing an existing day must persist). A NEW row is
+  // only created when the day is actually open: the invariant is "no row =
+  // closed", so a blind save on seed data (missing Sunday) must not
+  // materialize an inactive row.
+  const existingDays = new Set(
+    (await prisma.schedule.findMany({
+      where: { staffId, tenantId: scope.tenantId },
+      select: { dayOfWeek: true },
+    })).map((e) => e.dayOfWeek),
+  );
+
   await prisma.$transaction(
-    rows.map((row) =>
-      prisma.schedule.upsert({
-        where: { staffId_dayOfWeek: { staffId, dayOfWeek: row.dayOfWeek } },
-        create: {
-          tenantId: scope.tenantId,
-          staffId,
-          dayOfWeek: row.dayOfWeek,
-          startTime: row.startTime,
-          endTime: row.endTime,
-          breakStart: row.breakStart ?? null,
-          breakEnd: row.breakEnd ?? null,
-          active: row.active ?? true,
-        },
-        update: {
-          startTime: row.startTime,
-          endTime: row.endTime,
-          // Conditional spread — an omitted field leaves the stored value
-          // untouched (same rule as the services fix).
-          ...(row.breakStart !== undefined ? { breakStart: row.breakStart } : {}),
-          ...(row.breakEnd !== undefined ? { breakEnd: row.breakEnd } : {}),
-          ...(row.active !== undefined ? { active: row.active } : {}),
-        },
-      }),
-    ),
+    rows
+      .filter((row) => existingDays.has(row.dayOfWeek) || row.active === true)
+      .map((row) =>
+        prisma.schedule.upsert({
+          where: { staffId_dayOfWeek: { staffId, dayOfWeek: row.dayOfWeek } },
+          create: {
+            tenantId: scope.tenantId,
+            staffId,
+            dayOfWeek: row.dayOfWeek,
+            startTime: row.startTime,
+            endTime: row.endTime,
+            breakStart: row.breakStart ?? null,
+            breakEnd: row.breakEnd ?? null,
+            // Mirrors the editor: a day without an explicit `active` is CLOSED.
+            // Omitting the field must never self-open a day (e.g. crafted or
+            // partial payloads).
+            active: row.active ?? false,
+          },
+          update: {
+            startTime: row.startTime,
+            endTime: row.endTime,
+            // Conditional spread — an omitted field leaves the stored value
+            // untouched (same rule as the services fix).
+            ...(row.breakStart !== undefined ? { breakStart: row.breakStart } : {}),
+            ...(row.breakEnd !== undefined ? { breakEnd: row.breakEnd } : {}),
+            ...(row.active !== undefined ? { active: row.active } : {}),
+          },
+        }),
+      ),
   );
 
   revalidateSchedulePaths(scope.slug);

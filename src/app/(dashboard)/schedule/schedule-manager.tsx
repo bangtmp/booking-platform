@@ -26,6 +26,10 @@ type DaySchedule = {
   breakStart: string;
   breakEnd: string;
   active: boolean;
+  /** Original stored endTime (may be the "24:00" sentinel); null when no row. */
+  rawEndTime: string | null;
+  /** True once the owner explicitly changed endTime — "23:59" then means 23:59. */
+  endTimeDirty: boolean;
 };
 
 type Message = { kind: "error" | "success"; text: string };
@@ -52,10 +56,15 @@ function buildInitial(staff: StaffScheduleRow): DaySchedule[] {
     return {
       dayOfWeek: day,
       startTime: s?.startTime ?? DEFAULT_START,
-      endTime: s?.endTime ?? DEFAULT_END,
+      endTime: timeInputValue(s?.endTime ?? null) || DEFAULT_END,
       breakStart: timeInputValue(s?.breakStart ?? null),
       breakEnd: timeInputValue(s?.breakEnd ?? null),
-      active: s?.active ?? true,
+      // A day with no schedule row is CLOSED by default: opening it (ticking
+      // "Làm việc") must be an explicit owner action, otherwise a blind save
+      // on seed data silently opens a day that was never configured.
+      active: s?.active ?? false,
+      rawEndTime: s?.endTime ?? null,
+      endTimeDirty: false,
     };
   });
 }
@@ -132,7 +141,13 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
   const [message, setMessage] = useState<Message | null>(null);
 
   function onChange(index: number, next: DaySchedule) {
-    setRows((prev) => prev.map((r, i) => (i === index ? next : r)));
+    setRows((prev) =>
+      prev.map((r, i) =>
+        i === index
+          ? { ...next, endTimeDirty: next.endTimeDirty || next.endTime !== r.endTime }
+          : r,
+      ),
+    );
   }
 
   async function onSave() {
@@ -142,7 +157,14 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
       const input: ScheduleRowInput[] = rows.map((r) => ({
         dayOfWeek: r.dayOfWeek,
         startTime: r.startTime,
-        endTime: r.endTime,
+        // The engine's "24:00" end-of-day sentinel can't be typed into an HTML
+        // time input (max 23:59) so it is displayed as 23:59; restore it on
+        // save unless the owner explicitly changed the end time, otherwise the
+        // last slot (e.g. 23:30) would silently disappear on the next save.
+        endTime:
+          r.endTimeDirty || r.endTime !== "23:59" || r.rawEndTime !== "24:00"
+            ? r.endTime
+            : "24:00",
         breakStart: r.breakStart || null,
         breakEnd: r.breakEnd || null,
         active: r.active,

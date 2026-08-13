@@ -24,10 +24,11 @@ const staffInputSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-/** Keep the dashboard list + home stats + the public booking page in sync. */
+/** Keep the dashboard list + home stats + the schedule page (active badge) + public booking in sync. */
 function revalidateStaffPaths(slug: string) {
   revalidatePath("/staff");
   revalidatePath("/dashboard");
+  revalidatePath("/schedule");
   revalidatePath(`/booking/${slug}`);
 }
 
