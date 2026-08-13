@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   addMinutes,
@@ -12,6 +13,7 @@ import {
 import { addDays, tenantNow } from "@/lib/datetime";
 
 const AVAILABILITY_WINDOW_DAYS = 14;
+const CONFLICT_ERROR = "Khung giờ này vừa được đặt, vui lòng chọn giờ khác.";
 
 export type AvailabilityDay = { date: string; slots: string[] };
 
@@ -171,10 +173,43 @@ export async function getAvailableSlots(
   return { ok: true, slots };
 }
 
+/** Re-read schedules + bookings and recompute the free slots for one staff+date (past-filtered). */
+async function computeFreeSlots(
+  tenantId: string,
+  staffId: string,
+  date: string,
+  serviceMinutes: number,
+  timeZone: string,
+): Promise<string[]> {
+  const [schedules, bookings] = await Promise.all([
+    prisma.schedule.findMany({ where: { tenantId, staffId } }),
+    prisma.booking.findMany({ where: { tenantId, staffId, date } }),
+  ]);
+  return filterPastSlots(
+    getDaySlots({
+      date,
+      schedule: toScheduleInput(schedules),
+      bookings: bookings.map((b): BookingInput => ({ startTime: b.startTime, endTime: b.endTime, status: b.status })),
+      serviceMinutes,
+    }),
+    date,
+    timeZone,
+  );
+}
+
+type CreateBookingTxResult =
+  | { ok: true; booking: { id: string; customerName: string; date: string; startTime: string; endTime: string; status: string } }
+  | { ok: false; suggested: string[] };
+
 /**
  * Create a booking. Availability is RE-VALIDATED inside the transaction:
  * schedules + existing bookings for the staff+date are re-read and the slot is
  * recomputed with the engine; a slot no longer free (double-booking) is rejected.
+ *
+ * Concurrency backstop: a partial unique index on (staffId, date, startTime) WHERE
+ * status IN ('PENDING','CONFIRMED') guarantees at most one live booking per slot.
+ * A P2002 (unique violation) from a simultaneous request is mapped to the same
+ * conflict result, so exactly one of two racing bookings can win.
  */
 export async function createBooking(
   raw: z.input<typeof createBookingSchema>,
@@ -190,58 +225,73 @@ export async function createBooking(
   if (!tenant) return { ok: false, error: "Cơ sở không tồn tại." };
 
   const now = tenantNow(tenant.timezone);
+  const maxDate = addDays(now.date, AVAILABILITY_WINDOW_DAYS - 1);
   if (input.date < now.date) return { ok: false, error: "Không thể đặt lịch trong quá khứ." };
+  if (input.date > maxDate) {
+    return { ok: false, error: "Chỉ có thể đặt lịch trong 14 ngày tới." };
+  }
 
   const { service, staff } = await loadServiceAndStaff(tenant.id, input.serviceId, input.staffId);
   if (!service) return { ok: false, error: "Dịch vụ không tồn tại." };
   if (!staff) return { ok: false, error: "Nhân viên không tồn tại." };
 
-  const result = await prisma.$transaction(async (tx) => {
-    const [schedules, bookings] = await Promise.all([
-      tx.schedule.findMany({ where: { tenantId: tenant.id, staffId: input.staffId } }),
-      tx.booking.findMany({ where: { tenantId: tenant.id, staffId: input.staffId, date: input.date } }),
-    ]);
+  let result: CreateBookingTxResult;
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      const [schedules, bookings] = await Promise.all([
+        tx.schedule.findMany({ where: { tenantId: tenant.id, staffId: input.staffId } }),
+        tx.booking.findMany({ where: { tenantId: tenant.id, staffId: input.staffId, date: input.date } }),
+      ]);
 
-    const slots = filterPastSlots(
-      getDaySlots({
-        date: input.date,
-        schedule: toScheduleInput(schedules),
-        bookings: bookings.map((b): BookingInput => ({ startTime: b.startTime, endTime: b.endTime, status: b.status })),
-        serviceMinutes: service.durationMin,
-      }),
-      input.date,
-      tenant.timezone,
-    );
+      const slots = filterPastSlots(
+        getDaySlots({
+          date: input.date,
+          schedule: toScheduleInput(schedules),
+          bookings: bookings.map((b): BookingInput => ({ startTime: b.startTime, endTime: b.endTime, status: b.status })),
+          serviceMinutes: service.durationMin,
+        }),
+        input.date,
+        tenant.timezone,
+      );
 
-    if (!slots.includes(input.startTime)) {
-      return { ok: false as const, suggested: slots };
-    }
+      if (!slots.includes(input.startTime)) {
+        return { ok: false as const, suggested: slots };
+      }
 
-    const endTime = addMinutes(input.startTime, service.durationMin);
-    const booking = await tx.booking.create({
-      data: {
-        tenantId: tenant.id,
-        staffId: input.staffId,
-        serviceId: input.serviceId,
-        customerName: input.customerName,
-        customerPhone: input.customerPhone,
-        date: input.date,
-        startTime: input.startTime,
-        endTime,
-        status: tenant.confirmMode === "AUTO" ? "CONFIRMED" : "PENDING",
-        note: input.note ?? null,
-        createdById: null,
-      },
+      const endTime = addMinutes(input.startTime, service.durationMin);
+      const booking = await tx.booking.create({
+        data: {
+          tenantId: tenant.id,
+          staffId: input.staffId,
+          serviceId: input.serviceId,
+          customerName: input.customerName,
+          customerPhone: input.customerPhone,
+          date: input.date,
+          startTime: input.startTime,
+          endTime,
+          status: tenant.confirmMode === "AUTO" ? "CONFIRMED" : "PENDING",
+          note: input.note ?? null,
+          createdById: null,
+        },
+      });
+      return { ok: true as const, booking };
     });
-    return { ok: true as const, booking };
-  });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      const suggested = await computeFreeSlots(
+        tenant.id,
+        input.staffId,
+        input.date,
+        service.durationMin,
+        tenant.timezone,
+      );
+      return { ok: false, error: CONFLICT_ERROR, suggestedSlots: suggested.slice(0, 12) };
+    }
+    throw e;
+  }
 
   if (!result.ok) {
-    return {
-      ok: false,
-      error: "Khung giờ này vừa được đặt, vui lòng chọn giờ khác.",
-      suggestedSlots: result.suggested.slice(0, 12),
-    };
+    return { ok: false, error: CONFLICT_ERROR, suggestedSlots: result.suggested.slice(0, 12) };
   }
 
   return {

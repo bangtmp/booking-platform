@@ -169,4 +169,9 @@ model Booking {
   updatedAt     DateTime      @updatedAt
 
   @@index([tenantId, date])
+  // Anti-double-booking guard (raw SQL in migration 20260813123510_booking_confirm_unique):
+  //   CREATE UNIQUE INDEX "Booking_staff_date_start_time_unique"
+  //     ON "Booking" ("staffId","date","startTime") WHERE "status" IN ('PENDING','CONFIRMED');
+  // At most one PENDING/CONFIRMED booking per (staff, date, startTime). CANCELLED/COMPLETED
+  // rows don't occupy the slot (matches the availability engine's blockingStatuses).
 }
