@@ -66,10 +66,31 @@ const createBookingSchema = z.object({
     .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 
+/**
+ * Map saved Schedule rows straight into the engine's ScheduleInput — this is
+ * the load-bearing contract: the schedule editor stores exactly these fields
+ * (dayOfWeek, startTime, endTime, breakStart?, breakEnd?, active), and the
+ * engine consumes them unchanged. `active: false` rows and days with a break
+ * are honored by getDaySlots; null breaks are ignored by the engine.
+ */
 function toScheduleInput(
-  rows: { dayOfWeek: number; startTime: string; endTime: string }[],
+  rows: {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    breakStart: string | null;
+    breakEnd: string | null;
+    active: boolean;
+  }[],
 ): ScheduleInput[] {
-  return rows.map((s) => ({ dayOfWeek: s.dayOfWeek, startTime: s.startTime, endTime: s.endTime }));
+  return rows.map((s) => ({
+    dayOfWeek: s.dayOfWeek,
+    startTime: s.startTime,
+    endTime: s.endTime,
+    breakStart: s.breakStart,
+    breakEnd: s.breakEnd,
+    active: s.active,
+  }));
 }
 
 /** Slot starts strictly earlier than the tenant-local "now" are not bookable. */

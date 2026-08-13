@@ -26,7 +26,7 @@ export default async function BookingPage({
   const tenant = await prisma.tenant.findUnique({ where: { slug } });
   if (!tenant) notFound();
 
-  const [services, staff] = await Promise.all([
+  const [services, staffRows, staffSchedules] = await Promise.all([
     prisma.service.findMany({
       where: { tenantId: tenant.id, isActive: true },
       orderBy: { price: "asc" },
@@ -35,7 +35,15 @@ export default async function BookingPage({
       where: { tenantId: tenant.id, isActive: true },
       orderBy: { name: "asc" },
     }),
+    prisma.schedule.findMany({
+      where: { tenantId: tenant.id, active: true },
+      select: { staffId: true },
+    }),
   ]);
+
+  // Only show active staff who actually work: at least one active schedule row.
+  const staffWithSchedule = new Set(staffSchedules.map((s) => s.staffId));
+  const staff = staffRows.filter((s) => staffWithSchedule.has(s.id));
 
   return (
     <BookingFlow

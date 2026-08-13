@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-guard";
+import { requireOwnerScope } from "@/lib/tenant-scope";
 
 export type ServiceInput = {
   name: string;
@@ -38,21 +38,6 @@ const serviceInputSchema = z.object({
     .max(999_999_999_999, "Giá vượt quá giới hạn."),
   isActive: z.boolean().optional(),
 });
-
-/**
- * Tenancy scope for every write: the session user must be an OWNER attached to
- * a tenant. Every subsequent query is filtered by this tenantId so one salon
- * can never touch another salon's data.
- */
-async function requireOwnerScope(): Promise<{ tenantId: string; slug: string } | null> {
-  const user = await requireRole("OWNER");
-  if (!user.tenantId) return null;
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: user.tenantId },
-    select: { slug: true },
-  });
-  return tenant ? { tenantId: user.tenantId, slug: tenant.slug } : null;
-}
 
 /** Keep the dashboard list + home stats + the public booking page in sync. */
 function revalidateServicePaths(slug: string) {

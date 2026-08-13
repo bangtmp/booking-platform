@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth-guard";
-import { Placeholder } from "../_components/placeholder";
+import { prisma } from "@/lib/prisma";
+import StaffManager, { type StaffRow } from "./staff-manager";
 
 export const metadata: Metadata = { title: "Nhân viên — Booking Platform" };
 
 export default async function StaffPage() {
-  await requireRole("OWNER");
-  return (
-    <Placeholder
-      title="Nhân viên"
-      description="Thêm, sửa, xóa và bật/tắt trạng thái hoạt động của nhân viên. Tính năng sẽ được phát triển trong Task 8."
-    />
-  );
+  const user = await requireRole("OWNER");
+
+  const staff = user.tenantId
+    ? await prisma.staff.findMany({
+        where: { tenantId: user.tenantId },
+        orderBy: { createdAt: "asc" },
+      })
+    : [];
+
+  const rows: StaffRow[] = staff.map((s) => ({
+    id: s.id,
+    name: s.name,
+    isActive: s.isActive,
+    createdAt: s.createdAt.toISOString(),
+  }));
+
+  return <StaffManager staff={rows} />;
 }

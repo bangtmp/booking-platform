@@ -30,7 +30,7 @@ export function tenantNow(timeZone: string): { date: string; time: string } {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
 }
 
-const DAY_NAMES_VN = [
+export const DAY_NAMES_VN = [
   "Chủ nhật",
   "Thứ hai",
   "Thứ ba",
