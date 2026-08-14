@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Booking Platform
 
-## Getting Started
+Nền tảng đặt lịch hẹn đa cửa hàng cho salon, spa và phòng khám.
 
-First, run the development server:
+## Mục lục
+
+- [Tổng quan](#tổng-quan)
+- [Công nghệ](#công-nghệ)
+- [Chạy local](#chạy-local)
+  - [Production mode](#production-mode)
+  - [Demo mode](#demo-mode)
+- [Deploy](#deploy)
+  - [Vercel (demo)](#vercel-demo)
+  - [Vercel (production)](#vercel-production)
+- [Lưu ý](#lưu-ý)
+
+## Tổng quan
+
+- Khách đặt lịch công khai theo từng cửa hàng (`/booking/{slug}`).
+- Chủ cửa hàng quản lý dịch vụ, nhân viên, lịch làm việc và lịch hẹn qua dashboard.
+- Hỗ trợ xác nhận tự động hoặc thủ công theo cấu hình của từng cửa hàng.
+
+## Công nghệ
+
+- Next.js 16 + App Router
+- Prisma + PostgreSQL
+- better-auth
+- Tailwind CSS
+
+## Chạy local
+
+### Yêu cầu
+
+- Node.js >= 18
+- PostgreSQL >= 14 (chỉ cần cho production)
+- npm
+
+### Production mode
+
+1. Cài đặt dependencies:
+
+```bash
+npm install
+```
+
+2. Tạo file `.env` từ `.env.example` và điền đầy đủ các biến môi trường.
+3. Chạy migrate + seed:
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+4. Chạy dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Mở [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo mode
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Demo mode dùng dữ liệu cứng trong code, không cần database.
 
-## Learn More
+1. Tạo file `.env` với:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+DEMO_MODE=true
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Chạy dev server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev
+```
 
-## Deploy on Vercel
+3. Mở [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Trong demo mode:
+- Bạn sẽ được auto-login với quyền xem dashboard.
+- Mọi thao tác thêm/sửa/xóa đều bị chặn.
+- Dữ liệu hiển thị là dữ liệu mẫu cố định.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+### Vercel (demo)
+
+1. Tạo nhánh `demo-readonly` từ `main` và đẩy lên GitHub.
+2. Trong Vercel, tạo project mới và chọn nhánh `demo-readonly`.
+3. Thêm Environment Variable:
+   - `DEMO_MODE = true`
+4. Deploy.
+
+Bản demo không cần database hay biến môi trường khác.
+
+### Vercel (production)
+
+1. Chuẩn bị database PostgreSQL bên ngoài, ví dụ Neon, Supabase, Render, Railway.
+2. Tạo project trên Vercel từ nhánh `main`.
+3. Thêm Environment Variables:
+   - `DATABASE_URL`
+   - `BETTER_AUTH_SECRET`
+   - `BETTER_AUTH_URL`
+4. Chạy migrate + seed lên database của bạn.
+5. Deploy.
+
+## Lưu ý
+
+- `npm run build` hiện build được Next.js, nhưng Prisma generate nên được kiểm tra lại trước khi deploy production.
+- Trong demo mode, `npm run db:migrate` và `npm run db:seed` không cần chạy.
