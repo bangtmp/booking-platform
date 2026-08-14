@@ -1,6 +1,8 @@
 import { Playfair_Display } from "next/font/google";
 import { requireUser, type UserRole } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
+import { requireMockUser } from "@/lib/auth-mock";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import { Shell, type DashboardNavItem } from "./_components/shell";
 
 const playfair = Playfair_Display({
@@ -32,11 +34,15 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireUser();
+  const isDemo = process.env.DEMO_MODE === "true";
+  const user = isDemo ? requireMockUser() : await requireUser();
   const role = user.role as UserRole;
-  const tenant = user.tenantId
-    ? await prisma.tenant.findUnique({ where: { id: user.tenantId } })
-    : null;
+  const tenant =
+    isDemo && user.tenantId === DEMO_TENANT.id
+      ? DEMO_TENANT
+      : user.tenantId
+        ? await prisma.tenant.findUnique({ where: { id: user.tenantId } })
+        : null;
 
   const origin = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const publicBookingUrl = tenant ? `${origin}/booking/${tenant.slug}` : undefined;
