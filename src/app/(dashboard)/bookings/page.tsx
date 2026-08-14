@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole, homeForRole } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import { addDays, tenantNow } from "@/lib/datetime";
 import { requireOwnerScope } from "@/lib/tenant-scope";
 import { requireStaffScope } from "@/lib/staff-scope";
@@ -52,6 +53,7 @@ export default async function BookingsPage({
 }) {
   const user = await requireRole("OWNER", "STAFF");
   const role = user.role as "OWNER" | "STAFF";
+  const isDemo = process.env.DEMO_MODE === "true";
 
   // Role-aware tenancy scope. STAFF additionally resolves to their own staff
   // row (email link), which is the carry-over Task 6 acceptance criterion:

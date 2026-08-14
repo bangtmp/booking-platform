@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { DEMO_TENANT, DEMO_SCHEDULES } from "@/demo/seed-data";
 import BookingFlow from "./booking-flow";
 
 export async function generateMetadata({
@@ -23,27 +24,29 @@ export default async function BookingPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const tenant = await prisma.tenant.findUnique({ where: { slug } });
+  const isDemo = process.env.DEMO_MODE === "true";
+  const tenant = isDemo && slug === DEMO_TENANT.slug
+    ? DEMO_TENANT
+    : await prisma.tenant.findUnique({ where: { slug } });
   if (!tenant) notFound();
 
+  const tenantId = tenant.id;
   const [services, staffRows, staffSchedules] = await Promise.all([
-    prisma.service.findMany({
-      where: { tenantId: tenant.id, isActive: true },
-      orderBy: { price: "asc" },
-    }),
-    prisma.staff.findMany({
-      where: { tenantId: tenant.id, isActive: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.schedule.findMany({
-      where: { tenantId: tenant.id, active: true },
-      select: { staffId: true },
-    }),
+    repo.service.listByTenant(tenantId),
+    repo.staff.listByTenant(tenantId),
+    repo.schedule.listByTenantStaff(tenantId, ""),
   ]);
+
+  const activeServices = services
+    .filter((s) => s.isActive)
+    .sort((a, b) => a.price - b.price);
+  const activeStaff = staffRows
+    .filter((s) => s.isActive)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Only show active staff who actually work: at least one active schedule row.
   const staffWithSchedule = new Set(staffSchedules.map((s) => s.staffId));
-  const staff = staffRows.filter((s) => staffWithSchedule.has(s.id));
+  const staff = activeStaff.filter((s) => staffWithSchedule.has(s.id));
 
   return (
     <BookingFlow
@@ -53,7 +56,7 @@ export default async function BookingPage({
         timezone: tenant.timezone,
         confirmMode: tenant.confirmMode,
       }}
-      services={services.map((s) => ({
+      services={activeServices.map((s) => ({
         id: s.id,
         name: s.name,
         price: s.price.toString(),

@@ -11,6 +11,7 @@ import {
   type ScheduleInput,
 } from "@/lib/availability";
 import { addDays, tenantNow } from "@/lib/datetime";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 
 const AVAILABILITY_WINDOW_DAYS = 14;
 const CONFLICT_ERROR = "Khung giờ này vừa được đặt, vui lòng chọn giờ khác.";

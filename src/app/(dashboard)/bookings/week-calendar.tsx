@@ -85,6 +85,7 @@ const dangerBtn = "bg-red-50 text-red-600 hover:bg-red-100";
 const neutralBtn = "bg-zinc-100 text-zinc-600 hover:bg-zinc-200";
 
 export default function WeekCalendar({
+  isDemo,
   days,
   staffs,
   bookings,
@@ -293,7 +294,7 @@ export default function WeekCalendar({
                                     <div className="mt-1.5 flex flex-wrap gap-1">
                                       <button
                                         type="button"
-                                        disabled={acting !== null}
+                                        disabled={acting !== null || isDemo}
                                         onClick={() => act(b.id, "CONFIRMED")}
                                         className={`${actionBtn} ${primaryBtn}`}
                                       >
@@ -301,7 +302,7 @@ export default function WeekCalendar({
                                       </button>
                                       <button
                                         type="button"
-                                        disabled={acting !== null}
+                                        disabled={acting !== null || isDemo}
                                         onClick={() => act(b.id, "CANCELLED")}
                                         className={`${actionBtn} ${dangerBtn}`}
                                       >
@@ -313,7 +314,7 @@ export default function WeekCalendar({
                                     <div className="mt-1.5 flex flex-wrap gap-1">
                                       <button
                                         type="button"
-                                        disabled={acting !== null}
+                                        disabled={acting !== null || isDemo}
                                         onClick={() => act(b.id, "COMPLETED")}
                                         className={`${actionBtn} ${neutralBtn}`}
                                       >
@@ -321,7 +322,7 @@ export default function WeekCalendar({
                                       </button>
                                       <button
                                         type="button"
-                                        disabled={acting !== null}
+                                        disabled={acting !== null || isDemo}
                                         onClick={() => act(b.id, "CANCELLED")}
                                         className={`${actionBtn} ${dangerBtn}`}
                                       >

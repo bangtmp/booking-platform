@@ -195,7 +195,7 @@ function BasicsForm({
       </fieldset>
 
       <div className="flex justify-end">
-        <button type="submit" disabled={submitting} className={primaryButton}>
+        <button type="submit" disabled={submitting || readonly} className={primaryButton}>
           {submitting ? "Đang lưu…" : "Lưu cài đặt"}
         </button>
       </div>
@@ -280,10 +280,10 @@ function StaffLinkRow({
             placeholder="email-nhan-vien@..."
             className={`${fieldClass} w-64`}
           />
-          <button type="submit" disabled={busy} className={primaryButton}>
+          <button type="submit" disabled={busy || readonly} className={primaryButton}>
             {busy ? "Đang lưu…" : "Liên kết"}
           </button>
-          <button type="button" disabled={busy} onClick={onCancelLink} className={ghostButton}>
+          <button type="button" disabled={busy || readonly} onClick={onCancelLink} className={ghostButton}>
             Hủy
           </button>
         </form>
@@ -292,25 +292,25 @@ function StaffLinkRow({
           <span className="text-xs text-zinc-500">Bỏ liên kết?</span>
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || readonly}
             onClick={() => onConfirmUnlink(staff.id)}
             className="cursor-pointer rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-colors duration-200 hover:bg-red-700 disabled:opacity-50"
           >
             {busy ? "Đang xử lý…" : "Chắc chắn bỏ"}
           </button>
-          <button type="button" disabled={busy} onClick={onCancelUnlink} className={ghostButton}>
+          <button type="button" disabled={busy || readonly} onClick={onCancelUnlink} className={ghostButton}>
             Hủy
           </button>
         </div>
       ) : (
         <div className="flex items-center gap-2">
           {!staff.userEmail && (
-            <button type="button" disabled={busy} onClick={() => onStartLink(staff.id)} className={ghostButton}>
+            <button type="button" disabled={busy || readonly} onClick={() => onStartLink(staff.id)} className={ghostButton}>
               Liên kết
             </button>
           )}
           {staff.userEmail && (
-            <button type="button" disabled={busy} onClick={() => onAskUnlink(staff.id)} className={dangerButton}>
+            <button type="button" disabled={busy || readonly} onClick={() => onAskUnlink(staff.id)} className={dangerButton}>
               Bỏ liên kết
             </button>
           )}
@@ -321,15 +321,18 @@ function StaffLinkRow({
 }
 
 export default function SettingsManager({
+  isDemo,
   tenant,
   staffs,
 }: {
+  isDemo?: boolean;
   tenant: SettingsTenant;
   staffs: SettingsStaff[];
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<Message | null>(null);
   const [saving, setSaving] = useState(false);
+  const readonly = isDemo === true;
   const [busy, setBusy] = useState(false);
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [linkEmail, setLinkEmail] = useState("");

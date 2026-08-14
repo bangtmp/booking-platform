@@ -105,7 +105,7 @@ function StaffForm({
   );
 }
 
-export default function StaffManager({ staff }: { staff: StaffRow[] }) {
+export default function StaffManager({ staff, isDemo }: { staff: StaffRow[]; isDemo?: boolean }) {
   const router = useRouter();
   const [mode, setMode] = useState<FormMode | null>(null);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);

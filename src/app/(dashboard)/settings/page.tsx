@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import SettingsManager, { type SettingsStaff, type SettingsTenant } from "./settings-manager";
 
 export const metadata: Metadata = { title: "Cài đặt — Booking Platform" };

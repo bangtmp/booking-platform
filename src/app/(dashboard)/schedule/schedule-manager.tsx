@@ -134,11 +134,12 @@ function ScheduleRow({
   );
 }
 
-function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
+function StaffScheduleCard({ staff, isDemo }: { staff: StaffScheduleRow; isDemo?: boolean }) {
   const router = useRouter();
   const [rows, setRows] = useState<DaySchedule[]>(() => buildInitial(staff));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
+  const readonly = isDemo === true;
 
   function onChange(index: number, next: DaySchedule) {
     setRows((prev) =>
@@ -151,6 +152,7 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
   }
 
   async function onSave() {
+    if (readonly) return;
     setBusy(true);
     setMessage(null);
     try {
@@ -233,7 +235,7 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
       )}
 
       <div className="mt-4 flex justify-end">
-        <button type="button" onClick={onSave} disabled={busy} className={primaryButton}>
+        <button type="button" onClick={onSave} disabled={busy || readonly} className={primaryButton}>
           {busy ? "Đang lưu…" : "Lưu lịch làm việc"}
         </button>
       </div>
@@ -241,7 +243,8 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
   );
 }
 
-export default function ScheduleManager({ staff }: { staff: StaffScheduleRow[] }) {
+export default function ScheduleManager({
+  isDemo, staff }: { staff: StaffScheduleRow[] }) {
   return (
     <div className="space-y-6">
       <div>
@@ -265,7 +268,7 @@ export default function ScheduleManager({ staff }: { staff: StaffScheduleRow[] }
       ) : (
         <div className="space-y-5">
           {staff.map((s) => (
-            <StaffScheduleCard key={s.id} staff={s} />
+            <StaffScheduleCard key={s.id} staff={s} isDemo={isDemo} />
           ))}
         </div>
       )}

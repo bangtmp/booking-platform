@@ -21,6 +21,8 @@ type ServiceOption = { id: string; name: string; price: string; durationMin: num
 type StaffOption = { id: string; name: string };
 type TenantOption = { slug: string; name: string; timezone: string; confirmMode: "AUTO" | "MANUAL" };
 
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
 const STEP_LABELS = ["Dịch vụ", "Thời gian", "Thông tin"];
 
 const buttonBase =
@@ -517,11 +519,16 @@ export default function BookingFlow({
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || isDemoMode}
                 className={`${primaryButton} mt-1 self-end`}
               >
                 {submitting ? "Đang xử lý…" : "Xác nhận đặt lịch"}
               </button>
+              {isDemoMode && (
+                <p className="mt-2 text-xs text-zinc-500">
+                  Bản demo không hỗ trợ đặt lịch — chỉ trên các slot đã có.
+                </p>
+              )}
             </form>
           </div>
         )}

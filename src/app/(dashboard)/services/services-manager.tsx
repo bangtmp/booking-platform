@@ -145,13 +145,14 @@ function ServiceForm({
   );
 }
 
-export default function ServicesManager({ services }: { services: ServiceRow[] }) {
+export default function ServicesManager({ services, isDemo }: { services: ServiceRow[]; isDemo?: boolean }) {
   const router = useRouter();
   const [mode, setMode] = useState<FormMode | null>(null);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
+  const readonly = isDemo === true;
 
   async function run(
     id: string | null,
@@ -229,7 +230,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
             setMode({ type: "create" });
             setMessage(null);
           }}
-          disabled={busy}
+          disabled={busy || readonly}
           className={primaryButton}
         >
           Thêm dịch vụ
@@ -312,7 +313,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
                         <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={busy || readonly}
                             onClick={() => {
                               setMode({ type: "edit", service: s });
                               setMessage(null);
@@ -323,7 +324,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
                           </button>
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={busy || readonly}
                             onClick={() => onToggle(s)}
                             className={ghostButton}
                             title={
@@ -338,7 +339,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
                             <>
                               <button
                                 type="button"
-                                disabled={busy}
+                                disabled={busy || readonly}
                                 onClick={() => onDelete(s)}
                                 className="cursor-pointer rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-colors duration-200 hover:bg-red-700 disabled:opacity-50"
                               >
@@ -346,7 +347,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
                               </button>
                               <button
                                 type="button"
-                                disabled={busy}
+                                disabled={busy || readonly}
                                 onClick={() => setConfirmingDeleteId(null)}
                                 className={ghostButton}
                               >
@@ -356,7 +357,7 @@ export default function ServicesManager({ services }: { services: ServiceRow[] }
                           ) : (
                             <button
                               type="button"
-                              disabled={busy}
+                              disabled={busy || readonly}
                               onClick={() => {
                                 setConfirmingDeleteId(s.id);
                                 setMessage(null);
