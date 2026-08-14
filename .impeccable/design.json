@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T00:00:00.000Z",
+  "title": "Design System: Booking Platform",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Hồng Hoa Hồng", "canonical": "#ec4899", "tonalRamp": ["#7a1140", "#97184e", "#b5205d", "#d22a6e", "#e23680", "#ec4899", "#f27eb4", "#f9c6de"] },
+      "primary-deep": { "role": "primary", "displayName": "Hồng Đậm", "canonical": "#db2777", "tonalRamp": ["#5f0f33", "#7a1343", "#951c54", "#ae2263", "#c82571", "#db2777", "#ef6fa9", "#fad4e7"] },
+      "accent": { "role": "secondary", "displayName": "Tím Oải Hương", "canonical": "#8b5cf6", "tonalRamp": ["#3b1e8f", "#4c2bb0", "#5e37cf", "#7144e6", "#7f52f3", "#8b5cf6", "#a983f9", "#d9c4fc"] },
+      "background": { "role": "neutral", "displayName": "Giấy Sữa", "canonical": "#fff8fb", "tonalRamp": ["#d88fa8", "#e6aabb", "#efc2cf", "#f6d6df", "#fbe7ec", "#fff8fb", "#fffbfd", "#fffefe"] },
+      "blush": { "role": "neutral", "displayName": "Hồng Sương", "canonical": "#fdf2f8", "tonalRamp": ["#d15a9c", "#e07cb4", "#eda0cb", "#f5bddb", "#fad7e8", "#fdf2f8", "#fff7fb", "#fffdfe"] },
+      "blush-border": { "role": "neutral", "displayName": "Viền Hồng Phấn", "canonical": "#fbcee8", "tonalRamp": ["#c95a9e", "#e072b4", "#ec8fc6", "#f4aad4", "#f9c3e0", "#fbcee8", "#fdddf0", "#fef3f9"] },
+      "mist": { "role": "neutral", "displayName": "Sương Khói Tím", "canonical": "#f1eef5", "tonalRamp": ["#4a3f5e", "#6a5c84", "#8a7aa8", "#a99cc4", "#c9c0dd", "#e4dff0", "#f1eef5", "#faf9fc"] },
+      "foreground": { "role": "neutral", "displayName": "Mực Đêm", "canonical": "#171717", "tonalRamp": ["#000000", "#171717", "#2d2d2d", "#434343", "#5a5a5a", "#71717a", "#9f9fa9", "#d4d4d8"] },
+      "text-muted": { "role": "neutral", "displayName": "Xám Bồ Câu", "canonical": "#71717a", "tonalRamp": ["#3f3f46", "#52525b", "#5f5f68", "#71717a", "#85858e", "#9f9fa9", "#c0c0c8", "#e4e4e7"] },
+      "success": { "role": "semantic", "displayName": "Lục Lá Non", "canonical": "#047857", "tonalRamp": ["#022c22", "#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"] },
+      "warning": { "role": "semantic", "displayName": "Hổ Phách", "canonical": "#b45309", "tonalRamp": ["#451a03", "#78350f", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fde68a"] },
+      "error": { "role": "semantic", "displayName": "Đỏ Gạch", "canonical": "#dc2626", "tonalRamp": ["#450a0a", "#7f1d1d", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Tiêu đề trang công khai — tên cơ sở, màn hình thành công." },
+      "body": { "displayName": "Body", "purpose": "Nội dung chính, form, bảng." },
+      "mono": { "displayName": "Mono", "purpose": "Mã tham chiếu booking, khung giờ slot, số liệu." }
+    },
+    "shadows": [
+      { "name": "Bóng Nghỉ", "value": "0 1px 2px 0 rgb(219 39 119 / 0.04), 0 1px 3px 0 rgb(219 39 119 / 0.07)", "purpose": "Card booking nhỏ trong lịch tuần; tách nhẹ khỏi nền." },
+      { "name": "Bóng Card", "value": "0 2px 4px -1px rgb(219 39 119 / 0.06), 0 8px 20px -6px rgb(219 39 119 / 0.10)", "purpose": "Card chính: flow công khai, bảng, form, lịch tuần." },
+      { "name": "Bóng Nổi", "value": "0 10px 28px -8px rgb(219 39 119 / 0.12), 0 20px 60px -16px rgb(219 39 119 / 0.16)", "purpose": "Lớp cao nhất: card login, modal." },
+      { "name": "Glow Hồng", "value": "0 8px 20px -6px rgb(219 39 119 / 0.40)", "purpose": "Quầng cho logo gradient và CTA chủ lực." },
+      { "name": "Bóng Nổi Tím", "value": "0 12px 32px -10px rgb(139 92 246 / 0.25), 0 28px 72px -16px rgb(236 72 153 / 0.30)", "purpose": "Hover/card nổi bật (dự trữ)." }
+    ],
+    "motion": [
+      { "name": "state-transition", "value": "transition-colors 150ms-200ms ease", "purpose": "Chuyển nền/viền khi hover, focus, active." },
+      { "name": "focus-ring", "value": "outline 2px solid #ec4899, offset 2px", "purpose": "Tất cả phần tử tương tác khi focus-visible." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Hành động chính trong dashboard; nền Hồng Hoa Hồng, hover Hồng Đậm.",
+      "html": "<button class=\"ds-btn-primary\">Lưu dịch vụ</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; border:none; border-radius:4px; background:#ec4899; color:#fff; font-family:inherit; font-size:14px; font-weight:600; padding:8px 16px; transition:background-color .2s ease; } .ds-btn-primary:hover { background:#db2777; } .ds-btn-primary:focus-visible { outline:2px solid #ec4899; outline-offset:2px; } .ds-btn-primary:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Primary Button (Public, Lớn)",
+      "kind": "button",
+      "refersTo": "button-primary-lg",
+      "description": "Nút xác nhận trên trang đặt lịch công khai — bo 12px, padding rộng.",
+      "html": "<button class=\"ds-btn-primary-lg\">Xác nhận đặt lịch</button>",
+      "css": ".ds-btn-primary-lg { display:inline-flex; align-items:center; justify-content:center; cursor:pointer; border:none; border-radius:8px; background:#ec4899; color:#fff; font-family:inherit; font-size:14px; font-weight:600; padding:12px 24px; transition:background-color .15s ease; } .ds-btn-primary-lg:hover { background:#db2777; } .ds-btn-primary-lg:focus-visible { outline:2px solid #ec4899; outline-offset:2px; } .ds-btn-primary-lg:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Thao tác phụ: sửa, hủy, điều hướng; trắng + viền Hồng Phấn.",
+      "html": "<button class=\"ds-btn-ghost\">Sửa</button>",
+      "css": ".ds-btn-ghost { display:inline-flex; align-items:center; justify-content:center; cursor:pointer; border:1px solid #fbcee8; border-radius:4px; background:#fff; color:#52525b; font-family:inherit; font-size:14px; font-weight:500; padding:8px 12px; transition:background-color .2s ease,color .2s ease; } .ds-btn-ghost:hover { background:#f1eef5; } .ds-btn-ghost:focus-visible { outline:2px solid #ec4899; outline-offset:2px; } .ds-btn-ghost:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Xác nhận xóa — solid Đỏ Gạch, chữ trắng.",
+      "html": "<button class=\"ds-btn-danger\">Chắc chắn xóa?</button>",
+      "css": ".ds-btn-danger { display:inline-flex; align-items:center; justify-content:center; cursor:pointer; border:none; border-radius:4px; background:#dc2626; color:#fff; font-family:inherit; font-size:14px; font-weight:600; padding:8px 12px; transition:background-color .2s ease; } .ds-btn-danger:hover { background:#b91c1c; } .ds-btn-danger:focus-visible { outline:2px solid #dc2626; outline-offset:2px; } .ds-btn-danger:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Trường nhập liệu — trắng, viền Hồng Phấn, focus hồng + ring mềm.",
+      "html": "<input class=\"ds-input\" placeholder=\"VD: Nguyễn Văn A\" />",
+      "css": ".ds-input { width:100%; box-sizing:border-box; border:1px solid #fbcee8; border-radius:8px; background:#fff; color:#171717; font-family:inherit; font-size:14px; padding:10px 12px; outline:none; transition:border-color .15s ease,box-shadow .15s ease; } .ds-input::placeholder { color:#a1a1aa; } .ds-input:focus { border-color:#ec4899; box-shadow:0 0 0 3px rgb(236 72 153 / 0.2); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Pill trạng thái — pastel nền + chữ cùng hue đậm.",
+      "html": "<span class=\"ds-badge ds-badge-active\">Đang hoạt động</span>",
+      "css": ".ds-badge { display:inline-flex; align-items:center; border-radius:9999px; padding:2px 10px; font-family:inherit; font-size:12px; font-weight:500; line-height:1.6; } .ds-badge-active { background:#d1fae5; color:#047857; } .ds-badge-inactive { background:#f1eef5; color:#71717a; } .ds-badge-pending { background:#fef3c7; color:#b45309; } .ds-badge-cancelled { background:#f4f4f5; color:#71717a; } .ds-badge-completed { background:#ede9fe; color:#6d28d9; }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Link điều hướng dashboard — active nền hồng 10%, idle hover Sương Khói Tím.",
+      "html": "<a class=\"ds-nav\" href=\"#\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" width=\"20\" height=\"20\"><path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9.5V21h14V9.5\"/></svg><span>Lịch hẹn</span></a>",
+      "css": ".ds-nav { display:flex; align-items:center; gap:12px; border-radius:4px; padding:10px 12px; font-family:inherit; font-size:14px; font-weight:500; color:#52525b; text-decoration:none; transition:background-color .2s ease,color .2s ease; } .ds-nav:hover { background:#f1eef5; color:#18181b; } .ds-nav:focus-visible { outline:2px solid #ec4899; outline-offset:2px; } .ds-nav-active { background:rgb(236 72 153 / 0.10); color:#db2777; }"
+    },
+    {
+      "name": "Card Container",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Bề mặt chính — trắng, bo 16px, viền Hồng Phấn, Bóng Card.",
+      "html": "<div class=\"ds-card\"><p style=\"margin:0;font-family:inherit;font-size:14px;color:#3f3f46\">Nội dung card.</p></div>",
+      "css": ".ds-card { border:1px solid #fbcee8; border-radius:12px; background:#fff; color:#171717; padding:20px; box-shadow:0 2px 4px -1px rgb(219 39 119 / 0.06), 0 8px 20px -6px rgb(219 39 119 / 0.10); }"
+    },
+    {
+      "name": "Status Alert",
+      "kind": "card",
+      "refersTo": "badge",
+      "description": "Thông báo kết quả — nền pastel theo loại, text-sm.",
+      "html": "<div class=\"ds-alert ds-alert-success\">Đã thêm dịch vụ mới.</div>",
+      "css": ".ds-alert { border-radius:8px; padding:8px 12px; font-family:inherit; font-size:14px; line-height:1.5; } .ds-alert-success { background:#ecfdf5; color:#047857; } .ds-alert-error { background:#fef2f2; color:#dc2626; } .ds-alert-warning { background:#fffbeb; color:#b45309; }"
+    },
+    {
+      "name": "Booking Card (Lịch Tuần)",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Card booking trong lịch tuần — viền trái 4px theo trạng thái, giờ mono.",
+      "html": "<div class=\"ds-cal-card ds-cal-pending\"><p class=\"ds-cal-time\">09:00–09:30</p><p class=\"ds-cal-name\">Nguyễn Thị A</p><p class=\"ds-cal-service\">Cắt tóc</p><span class=\"ds-badge ds-badge-pending\">Chờ xác nhận</span></div>",
+      "css": ".ds-cal-card { background:#fff; border-left:4px solid; border-radius:8px; padding:6px 8px; box-shadow:0 1px 2px 0 rgb(219 39 119 / 0.04), 0 1px 3px 0 rgb(219 39 119 / 0.07); font-family:inherit; } .ds-cal-pending { border-color:#fbbf24; } .ds-cal-confirmed { border-color:#10b981; } .ds-cal-completed { border-color:#a78bfa; } .ds-cal-cancelled { border-color:#d4d4d8; } .ds-cal-time { margin:0; font-family:'Geist Mono',ui-monospace,monospace; font-size:11px; font-weight:600; color:#18181b; } .ds-cal-name { margin:0; font-size:12px; font-weight:500; color:#27272a; } .ds-cal-service { margin:0; font-size:11px; color:#71717a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Lời Chào Nồng Ấm",
+    "overview": "Mỗi màn hình của Booking Platform phải đọc như một lời chào đón chu đáo của một tiệm dịch vụ tốt: ấm áp, duyên dáng, trân trọng từng khách, nhưng không bao giờ phô trương. Giọng thẩm mỹ là ấm và duyên: bảng màu hồng-tím trên nền blush sữa gợi sự mềm mại của cánh hoa và ánh sáng cửa tiệm buổi sớm, serif Playfair cho tiêu đề và sans Geist cho thân chữ tạo sự đối lập tinh tế giữa sang trọng và thực dụng. Thành phần UI theo tinh thần trang nhã, kiềm chế — bo tròn dịu, bóng đổ mềm tint màu, màu sắc dành cho điểm nhấn thay vì phủ kín.",
+    "keyCharacteristics": [
+      "Nền sữa hồng (#fff8fb) với bề mặt trắng, không dùng nền hồng đặc phủ toàn màn hình.",
+      "Một điểm nhấn hồng tươi (#ec4899) + một đồng hành tím oải hương (#8b5cf6); cả hai dành cho hành động và dấu ấn, không cho văn bản dài.",
+      "Serif Playfair chỉ ở tiêu đề; thân chữ, label, bảng dùng sans Geist.",
+      "Bo tròn mềm mọi bề mặt (8–24px), badge hình viên thuốc.",
+      "Bóng đổ luôn tint hồng/tím, nhẹ nhàng; đường viền hồng phấn làm công việc phân định cấu trúc.",
+      "Phản hồi trạng thái bằng các tông pastel ngữ nghĩa (emerald/amber/red) trên nền nhạt."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Hồng Hoa Hồng chỉ hiện diện ở điểm nhấn — chiếm ≤ ~10% diện tích bất kỳ màn hình nào. Sự hiếm hoi của nó chính là sức mạnh; một màn hình ngập hồng là màn hình mất phép.", "section": "colors" },
+      { "name": "The Blush Field Rule", "body": "Vùng nền lớn dùng Giấy Sữa hoặc Hồng Sương, không bao giờ dùng màu accent đặc full-bleed. Hồng/tím chỉ lấn sân qua gradient logo, quầng sáng và điểm nhấn nhỏ.", "section": "colors" },
+      { "name": "The Pink Line Rule", "body": "Viền cấu trúc luôn là Viền Hồng Phấn (#fbcee8), không dùng xám trung tính cho border — nhờ đó cả màn hình trung tính vẫn giữ hơi ấm.", "section": "colors" },
+      { "name": "The Serif Ceiling Rule", "body": "Playfair chỉ dành cho Display và Headline. Label, body, bảng, nút — mọi thứ dưới tiêu đề — dùng Geist. Serif làm việc kiêu hơn mức thân chữ; để nó lấn xuống là mất cân bằng.", "section": "typography" },
+      { "name": "The Single Voice Rule", "body": "Mỗi màn hình có một giọng chữ chính; không trộn serif với sans trong cùng một câu hay trộn nhiều size không nhất quán cho cùng một vai trò.", "section": "typography" },
+      { "name": "The Soft Shadow Rule", "body": "Mọi bóng đổ pha theo hue hồng (#db2777) hoặc tím (#8b5cf6); cấm bóng rgba(0,0,0,·) thuần. Bóng là nguồn hơi ấm, không phải nguồn tương phản.", "section": "elevation" },
+      { "name": "The Flat-By-Default Rule", "body": "Thành phần nghỉ ngơi thì phẳng (chỉ có viền); bóng xuất hiện khi có lý do nổi (card chính, hover, dialog). Không đè bóng lên mọi thứ.", "section": "elevation" },
+      { "name": "The Soft Corner Rule", "body": "Không có góc vuông 0px trong hệ thống. Nếu một bề mặt tương tác được, nó phải có bán kính ≥ 8px; cấp nền lớn càng cong càng thân thiện.", "section": "shapes" },
+      { "name": "The Status Edge Rule", "body": "Trạng thái booking sống trên viền trái 4px — một mảnh màu nhỏ ở cạnh, không phủ màu lên toàn card.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do dùng Hồng Hoa Hồng cho hành động chính và dấu ấn ngắn, và để các tông trung tính ấm gánh phần còn lại của màn hình.",
+      "Do bo tròn mọi bề mặt: ≥8px cho tương tác, 16–24px cho card chính, pill cho badge.",
+      "Do dùng Viền Hồng Phấn cho mọi border cấu trúc để giữ hơi ấm kể cả ở vùng trung tính.",
+      "Do dùng Playfair chỉ cho Display/Headline và Geist cho mọi thứ còn lại.",
+      "Do báo trạng thái bằng nền pastel + chữ cùng hue đậm (emerald/amber/red/violet).",
+      "Do tint bóng đổ theo hue hồng/tím và để bóng ở tầng nổi, không phủ toàn trang.",
+      "Do giữ bảng dữ liệu cuộn ngang trên mobile (overflow-x-auto) thay vì thu nhỏ chữ."
+    ],
+    "donts": [
+      "Don't phủ Hồng Hoa Hồng lên văn bản dài hay nền lớn — sự hiếm hoi của nó là phép thuật.",
+      "Don't dùng bóng đen phẳng rgba(0,0,0,…); bóng phải tint màu.",
+      "Don't dùng góc vuông sắc 0px cho bất kỳ bề mặt tương tác nào.",
+      "Don't dùng serif cho label, body, bảng hay nút.",
+      "Don't đổi màu viền cấu trúc sang xám trung tính — mất hơi ấm nền.",
+      "Don't trộn nhiều cấp chữ không nhất quán cho cùng một vai trò (một giọng chữ mỗi màn hình)."
+    ]
+  }
+}

@@ -46,8 +46,9 @@ export default async function DashboardHomePage() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className="rounded-2xl border border-blush-border bg-white p-5 shadow-sm"
+            className="relative overflow-hidden rounded-2xl border border-blush-border bg-white p-5 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           >
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-accent" />
             <p className="text-sm font-medium text-zinc-500">{s.label}</p>
             <p className="font-display mt-2 text-3xl font-bold text-primary-deep">{s.value}</p>
             <p className="mt-1 text-xs text-zinc-400">{s.hint}</p>
@@ -56,7 +57,7 @@ export default async function DashboardHomePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-blush-border bg-white p-5 shadow-sm lg:col-span-2">
+        <div className="rounded-2xl border border-blush-border bg-white p-5 shadow-md lg:col-span-2">
           <h2 className="text-sm font-semibold text-zinc-900">Đường dẫn đặt lịch công khai</h2>
           <p className="mt-1 text-sm text-zinc-600">
             Chia sẻ đường dẫn này để khách hàng đặt lịch trực tuyến.
@@ -77,7 +78,7 @@ export default async function DashboardHomePage() {
         <div className="space-y-3">
           <Link
             href="/bookings"
-            className="block cursor-pointer rounded-2xl border border-blush-border bg-white p-5 shadow-sm transition-colors duration-200 hover:border-primary"
+            className="block cursor-pointer rounded-2xl border border-blush-border bg-white p-5 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
           >
             <p className="text-sm font-semibold text-zinc-900">Quản lý lịch hẹn</p>
             <p className="mt-1 text-sm text-zinc-600">
@@ -86,7 +87,7 @@ export default async function DashboardHomePage() {
           </Link>
           <Link
             href="/services"
-            className="block cursor-pointer rounded-2xl border border-blush-border bg-white p-5 shadow-sm transition-colors duration-200 hover:border-primary"
+            className="block cursor-pointer rounded-2xl border border-blush-border bg-white p-5 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
           >
             <p className="text-sm font-semibold text-zinc-900">Quản lý dịch vụ</p>
             <p className="mt-1 text-sm text-zinc-600">

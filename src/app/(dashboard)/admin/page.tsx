@@ -38,7 +38,7 @@ export default async function AdminPage() {
           <p className="text-sm text-zinc-500">Chưa có cơ sở nào đăng ký.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-blush-border bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-blush-border bg-white shadow-md">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-blush-border text-xs uppercase tracking-wide text-zinc-500">

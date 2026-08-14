@@ -25,7 +25,7 @@ const STEP_LABELS = ["Dịch vụ", "Thời gian", "Thông tin"];
 
 const buttonBase =
   "cursor-pointer rounded-xl transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
-const primaryButton = `${buttonBase} bg-primary-deep px-6 py-3 text-sm font-semibold text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50`;
+const primaryButton = `${buttonBase} bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-deep disabled:cursor-not-allowed disabled:opacity-50`;
 const ghostButton = `${buttonBase} border border-blush-border bg-white px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-mist`;
 
 function CheckIcon({ className }: { className?: string }) {
@@ -199,7 +199,7 @@ export default function BookingFlow({
   if (success) {
     return (
       <main className="mx-auto w-full max-w-xl flex-1 px-4 py-12 sm:py-16">
-        <div className="rounded-3xl border border-blush-border bg-white p-8 text-center shadow-sm">
+        <div className="rounded-3xl border border-blush-border bg-white p-8 text-center shadow-md">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
             <CheckIcon className="h-7 w-7" />
           </div>
@@ -277,17 +277,19 @@ export default function BookingFlow({
                   {label}
                 </span>
               </div>
-              {n < STEP_LABELS.length && <span className="h-px w-6 bg-blush-border sm:w-10" />}
+              {n < STEP_LABELS.length && (
+                <span className="h-0.5 w-6 rounded-full bg-gradient-to-r from-primary/40 to-accent/40 sm:w-10" />
+              )}
             </div>
           );
         })}
       </nav>
 
-      <div className="mt-8 rounded-3xl border border-blush-border bg-white p-5 shadow-sm sm:p-8">
+      <div className="mt-8 rounded-3xl border border-blush-border bg-white p-5 shadow-md sm:p-8">
         {step === 1 && (
           <div className="flex flex-col gap-4">
             <SectionTitle step="1" title="Chọn dịch vụ" />
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((s) => (
                 <button
                   key={s.id}

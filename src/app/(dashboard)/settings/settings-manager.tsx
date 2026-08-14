@@ -80,7 +80,7 @@ function MessageBanner({ message }: { message: Message | null }) {
 
 function Card({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-blush-border bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-blush-border bg-white p-5 shadow-md sm:p-6">
       <h2 className="font-display text-lg font-semibold text-zinc-900">{title}</h2>
       <p className="mt-1 text-sm text-zinc-600">{description}</p>
       <div className="mt-5">{children}</div>

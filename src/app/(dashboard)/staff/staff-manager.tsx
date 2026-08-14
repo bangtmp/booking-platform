@@ -219,7 +219,7 @@ export default function StaffManager({ staff }: { staff: StaffRow[] }) {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-blush-border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-blush-border bg-white shadow-md">
         {staff.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-sm text-zinc-600">

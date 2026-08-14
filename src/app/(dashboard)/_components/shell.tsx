@@ -117,7 +117,7 @@ export function Shell({
     <div className="min-h-screen bg-blush text-zinc-900">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-blush-border bg-white/80 backdrop-blur md:flex">
         <div className="flex h-16 items-center gap-2.5 border-b border-blush-border px-5">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-white">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-white shadow-glow">
             {ICONS.sparkles}
           </span>
           <div className="min-w-0">
@@ -154,7 +154,7 @@ export function Shell({
       <div className="md:pl-64">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-blush-border bg-white/80 px-4 backdrop-blur md:px-8">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-white md:hidden">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-white shadow-glow md:hidden">
               {ICONS.sparkles}
             </span>
             <p className="truncate text-sm font-bold text-zinc-900 md:text-base">{tenantName}</p>

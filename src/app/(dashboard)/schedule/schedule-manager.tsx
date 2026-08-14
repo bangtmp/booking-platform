@@ -186,7 +186,7 @@ function StaffScheduleCard({ staff }: { staff: StaffScheduleRow }) {
   const activeDays = rows.filter((r) => r.active).length;
 
   return (
-    <div className="rounded-2xl border border-blush-border bg-white p-5 shadow-sm sm:p-6">
+    <div className="rounded-2xl border border-blush-border bg-white p-5 shadow-md sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
           <h2 className="font-display text-lg font-semibold text-zinc-900">{staff.name}</h2>

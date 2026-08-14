@@ -13,6 +13,24 @@ const BUSINESS_TYPES = [
   { value: "OTHER", label: "Khác" },
 ];
 
+function SparklesIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 3l1.9 4.9L18.8 9.8l-4.9 1.9L12 16.6l-1.9-4.9L5.2 9.8l4.9-1.9L12 3z" />
+      <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" />
+    </svg>
+  );
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const [tenantName, setTenantName] = useState("");
@@ -56,20 +74,27 @@ export default function RegisterPage() {
   }
 
   const fieldClass =
-    "rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200";
+    "rounded-xl border border-blush-border bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20";
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 py-12">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-zinc-900">
+    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-br from-blush via-white to-mist px-4 py-12">
+      <div className="pointer-events-none absolute -top-32 right-1/4 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
+
+      <div className="relative w-full max-w-md rounded-3xl border border-blush-border bg-white p-8 shadow-lg">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent shadow-glow">
+          <SparklesIcon className="h-6 w-6 text-white" />
+        </div>
+
+        <h1 className="font-display mt-5 text-center text-2xl font-bold text-zinc-900">
           Đăng ký cơ sở mới
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1.5 text-center text-sm text-zinc-500">
           Tạo tài khoản chủ cơ sở và không gian quản lý riêng.
         </p>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">
             {error}
           </p>
         )}
@@ -136,7 +161,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+            className="mt-2 cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition-colors hover:bg-primary-deep disabled:opacity-50"
           >
             {loading ? "Đang tạo…" : "Đăng ký và đăng nhập"}
           </button>
@@ -144,7 +169,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-zinc-500">
           Đã có tài khoản?{" "}
-          <Link href="/login" className="font-medium text-zinc-900 underline">
+          <Link href="/login" className="font-medium text-primary hover:text-primary-deep">
             Đăng nhập
           </Link>
         </p>

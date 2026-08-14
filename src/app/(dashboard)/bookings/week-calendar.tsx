@@ -78,7 +78,7 @@ function formatWeekRange(weekStart: string): string {
 }
 
 const actionBtn =
-  "cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50";
+  "cursor-pointer rounded-lg px-2 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50";
 const primaryBtn =
   "bg-primary/10 text-primary-deep hover:bg-primary/20";
 const dangerBtn = "bg-red-50 text-red-600 hover:bg-red-100";
@@ -195,11 +195,11 @@ export default function WeekCalendar({
       )}
 
       {staffs.length === 0 ? (
-        <p className="rounded-xl bg-white p-6 text-center text-sm text-zinc-500">
+        <p className="rounded-xl border border-blush-border bg-white p-6 text-center text-sm text-zinc-500">
           Chưa có nhân viên nào trong cơ sở.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-blush-border bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-blush-border bg-white shadow-md">
           <div
             className="grid"
             style={{ gridTemplateColumns: "150px repeat(7, minmax(190px, 1fr))" }}

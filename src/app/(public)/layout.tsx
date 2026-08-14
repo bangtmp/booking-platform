@@ -7,7 +7,7 @@ const playfair = Playfair_Display({
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${playfair.variable} flex min-h-full flex-col bg-blush`}>
+    <div className={`${playfair.variable} flex min-h-dvh flex-col bg-blush`}>
       {children}
     </div>
   );
