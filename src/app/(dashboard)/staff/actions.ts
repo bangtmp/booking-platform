@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwnerScope } from "@/lib/tenant-scope";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 
 export type StaffInput = {
   name: string;
@@ -37,6 +38,7 @@ function firstIssue(error: z.ZodError): string {
 }
 
 export async function createStaff(raw: StaffInput): Promise<StaffActionResult> {
+  ensureNotDemoMutation();
   const parsed = staffInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -59,6 +61,7 @@ export async function updateStaff(
   id: string,
   raw: StaffInput,
 ): Promise<StaffActionResult> {
+  ensureNotDemoMutation();
   const parsed = staffInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -87,6 +90,7 @@ export async function toggleStaffActive(
   id: string,
   isActive: boolean,
 ): Promise<StaffActionResult> {
+  ensureNotDemoMutation();
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 
@@ -112,6 +116,7 @@ export async function toggleStaffActive(
  * tenant can never be touched. P2003 (Restrict) is still raised and mapped.
  */
 export async function deleteStaff(id: string): Promise<StaffActionResult> {
+  ensureNotDemoMutation();
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwnerScope } from "@/lib/tenant-scope";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 
 export type ServiceInput = {
   name: string;
@@ -51,6 +52,7 @@ function firstIssue(error: z.ZodError): string {
 }
 
 export async function createService(raw: ServiceInput): Promise<ServiceActionResult> {
+  ensureNotDemoMutation();
   const parsed = serviceInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -75,6 +77,7 @@ export async function updateService(
   id: string,
   raw: ServiceInput,
 ): Promise<ServiceActionResult> {
+  ensureNotDemoMutation();
   const parsed = serviceInputSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -105,6 +108,7 @@ export async function toggleServiceActive(
   id: string,
   isActive: boolean,
 ): Promise<ServiceActionResult> {
+  ensureNotDemoMutation();
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 
@@ -130,6 +134,7 @@ export async function toggleServiceActive(
  * never be touched. P2003 (Restrict) is still raised on deleteMany and mapped.
  */
 export async function deleteService(id: string): Promise<ServiceActionResult> {
+  ensureNotDemoMutation();
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 

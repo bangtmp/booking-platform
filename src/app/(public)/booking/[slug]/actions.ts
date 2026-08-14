@@ -235,6 +235,7 @@ type CreateBookingTxResult =
 export async function createBooking(
   raw: z.input<typeof createBookingSchema>,
 ): Promise<CreateBookingResult> {
+  ensureNotDemoMutation();
   const parsed = createBookingSchema.safeParse(raw);
   if (!parsed.success) {
     const message = parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ.";

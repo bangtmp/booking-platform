@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireOwnerScope } from "@/lib/tenant-scope";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 import { parseTime } from "@/lib/availability";
 
 /**
@@ -122,6 +123,7 @@ export async function saveSchedule(
   staffId: string,
   raw: ScheduleRowInput[],
 ): Promise<SaveScheduleResult> {
+  ensureNotDemoMutation();
   const parsed = scheduleRowsSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();

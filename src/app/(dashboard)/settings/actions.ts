@@ -6,6 +6,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwnerScope } from "@/lib/tenant-scope";
 import { isValidTimeZone } from "@/lib/timezones";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 
 export type TenantSettingsInput = {
   name: string;
@@ -71,6 +72,7 @@ function revalidateSettingsPaths(slug: string) {
 export async function updateTenantSettings(
   raw: TenantSettingsInput,
 ): Promise<SettingsActionResult> {
+  ensureNotDemoMutation();
   const parsed = tenantSettingsSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -105,6 +107,7 @@ export async function updateTenantSettings(
 export async function linkStaffEmail(
   raw: { staffId: string; email: string },
 ): Promise<SettingsActionResult> {
+  ensureNotDemoMutation();
   const parsed = linkStaffSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
   const scope = await requireOwnerScope();
@@ -161,6 +164,7 @@ export async function linkStaffEmail(
  * nhân viên" notice card on /bookings again until re-linked.
  */
 export async function unlinkStaffEmail(staffId: string): Promise<SettingsActionResult> {
+  ensureNotDemoMutation();
   const scope = await requireOwnerScope();
   if (!scope) return { ok: false, error: "Tài khoản chưa gắn với cơ sở." };
 

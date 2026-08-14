@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth-guard";
 import { requireOwnerScope } from "@/lib/tenant-scope";
 import { requireStaffScope } from "@/lib/staff-scope";
+import { ensureNotDemoMutation } from "@/lib/read-only-guard";
 
 const statusSchema = z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]);
 
@@ -43,6 +44,7 @@ export async function updateBookingStatus(
   bookingId: string,
   rawStatus: string,
 ): Promise<UpdateBookingStatusResult> {
+  ensureNotDemoMutation();
   const parsed = statusSchema.safeParse(rawStatus);
   if (!parsed.success) return { ok: false, error: "Trạng thái không hợp lệ." };
 
