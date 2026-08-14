@@ -17,6 +17,7 @@ type ShellProps = {
   userName: string;
   userRoleLabel: string;
   publicBookingUrl?: string;
+  isDemo?: boolean;
   children: React.ReactNode;
 };
 
@@ -89,6 +90,7 @@ export function Shell({
   userName,
   userRoleLabel,
   publicBookingUrl,
+  isDemo,
   children,
 }: ShellProps) {
   const pathname = usePathname();
@@ -115,6 +117,11 @@ export function Shell({
 
   return (
     <div className="min-h-screen bg-blush text-zinc-900">
+      {isDemo && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-700">
+          Bản demo – chỉ xem
+        </div>
+      )}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-blush-border bg-white/80 backdrop-blur md:flex">
         <div className="flex h-16 items-center gap-2.5 border-b border-blush-border px-5">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-white shadow-glow">
@@ -167,7 +174,8 @@ export function Shell({
             <button
               type="button"
               onClick={onLogout}
-              disabled={loggingOut}
+              disabled={loggingOut || isDemo}
+              title={isDemo ? "Bản demo chỉ xem" : undefined}
               className="flex cursor-pointer items-center gap-2 rounded-lg border border-blush-border bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:bg-mist disabled:opacity-60"
             >
               {ICONS.logout}

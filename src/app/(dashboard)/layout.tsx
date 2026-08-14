@@ -55,6 +55,7 @@ export default async function DashboardLayout({
         userName={user.name}
         userRoleLabel={ROLE_LABEL[role]}
         publicBookingUrl={publicBookingUrl}
+        isDemo={isDemo}
       >
         {children}
       </Shell>
