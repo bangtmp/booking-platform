@@ -92,10 +92,12 @@ function BasicsForm({
   initial,
   submitting,
   onSubmit,
+  readonly,
 }: {
   initial: SettingsTenant;
   submitting: boolean;
   onSubmit: (input: TenantSettingsInput) => void;
+  readonly: boolean;
 }) {
   const [name, setName] = useState(initial.name);
   const [businessType, setBusinessType] = useState(initial.businessType);
@@ -216,6 +218,7 @@ function StaffLinkRow({
   onAskUnlink,
   onCancelUnlink,
   onConfirmUnlink,
+  readonly,
 }: {
   staff: SettingsStaff;
   busy: boolean;
@@ -229,6 +232,7 @@ function StaffLinkRow({
   onAskUnlink: (id: string) => void;
   onCancelUnlink: () => void;
   onConfirmUnlink: (id: string) => void;
+  readonly: boolean;
 }) {
   const linking = linkingId === staff.id;
   const confirmingUnlink = confirmingUnlinkId === staff.id;
@@ -405,7 +409,7 @@ export default function SettingsManager({
         title="Thông tin cơ sở"
         description="Tên, loại hình kinh doanh, múi giờ và chế độ xác nhận đặt lịch."
       >
-        <BasicsForm key={tenant.slug} initial={tenant} submitting={saving} onSubmit={onSave} />
+        <BasicsForm key={tenant.slug} initial={tenant} submitting={saving} onSubmit={onSave} readonly={readonly} />
       </Card>
 
       <Card
@@ -441,6 +445,7 @@ export default function SettingsManager({
                 }}
                 onCancelUnlink={() => setConfirmingUnlinkId(null)}
                 onConfirmUnlink={onConfirmUnlink}
+                readonly={readonly}
               />
             ))}
           </div>

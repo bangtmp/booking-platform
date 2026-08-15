@@ -12,7 +12,7 @@ export default async function StaffPage() {
   const isDemo = process.env.DEMO_MODE === "true";
   const tenantId = isDemo && user.tenantId === DEMO_TENANT.id ? DEMO_TENANT.id : user.tenantId;
 
-  const staff = user.tenantId
+  const staff = typeof tenantId === "string"
     ? await repo.staff.listByTenant(tenantId)
     : [];
 
@@ -20,7 +20,7 @@ export default async function StaffPage() {
     id: s.id,
     name: s.name,
     isActive: s.isActive,
-    createdAt: s.createdAt ? (s.createdAt as unknown as Date).toISOString() : new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   }));
 
   return <StaffManager staff={rows} isDemo={isDemo} />;

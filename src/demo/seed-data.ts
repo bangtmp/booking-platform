@@ -155,8 +155,16 @@ export function listStaffsByTenant(tenantId: string): DemoStaff[] {
   return DEMO_STAFFS.filter((s) => s.tenantId === tenantId);
 }
 
+export function listSchedulesByTenant(tenantId: string): DemoSchedule[] {
+  return DEMO_SCHEDULES.filter((s) => s.tenantId === tenantId);
+}
+
 export function listSchedulesByTenantStaff(tenantId: string, staffId: string): DemoSchedule[] {
   return DEMO_SCHEDULES.filter((s) => s.tenantId === tenantId && s.staffId === staffId);
+}
+
+export function listBookingsByTenant(tenantId: string): DemoBooking[] {
+  return DEMO_BOOKINGS.filter((b) => b.tenantId === tenantId);
 }
 
 export function listBookingsByTenantDate(tenantId: string, date: string): DemoBooking[] {

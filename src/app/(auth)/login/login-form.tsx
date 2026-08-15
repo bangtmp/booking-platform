@@ -39,10 +39,17 @@ export default function LoginForm({
       : null,
   );
 
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    if (isDemo) {
+      router.push("/dashboard");
+      router.refresh();
+      return;
+    }
     const { error } = await authClient.signIn.email({ email, password });
     if (error) {
       setError(error.message ?? "Đăng nhập thất bại.");
@@ -125,9 +132,18 @@ export default function LoginForm({
         </p>
 
         <div className="mt-6 rounded-xl border border-blush-border bg-blush px-3 py-2 text-xs text-zinc-500">
-          <p className="font-medium text-zinc-600">Tài khoản demo (seed):</p>
-          <p>admin@example.com / admin123</p>
-          <p>owner@demo.com / owner123</p>
+          {isDemo ? (
+            <>
+              <p className="font-medium text-zinc-600">Bản demo – chỉ xem</p>
+              <p>Đăng nhập bằng bất kỳ email và mật khẩu nào.</p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium text-zinc-600">Tài khoản demo (seed):</p>
+              <p>admin@example.com / admin123</p>
+              <p>owner@demo.com / owner123</p>
+            </>
+          )}
         </div>
       </div>
     </div>

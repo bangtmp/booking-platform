@@ -34,6 +34,7 @@ type WeekCalendarProps = {
   weekStart: string;
   confirmMode: "AUTO" | "MANUAL";
   isOwner: boolean;
+  isDemo?: boolean;
 };
 
 type BookingStatus = CalendarBooking["status"];

@@ -41,10 +41,18 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (isDemo) {
+      setError("Bản demo chỉ cho phép đăng nhập, không hỗ trợ đăng ký cơ sở mới.");
+      setLoading(false);
+      return;
+    }
 
     const result = await registerTenant({
       tenantName,

@@ -1,10 +1,13 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { MOCK_USER } from "@/lib/auth-mock";
 
 export type UserRole = "ADMIN" | "OWNER" | "STAFF";
 export type Session = typeof auth.$Infer.Session;
 export type AuthUser = Session["user"];
+
+const isDemo = process.env.DEMO_MODE === "true";
 
 /** Role-aware dashboard home: what an unauthorized user is redirected to. */
 export function homeForRole(role: UserRole): string {
@@ -19,6 +22,7 @@ export function homeForRole(role: UserRole): string {
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  if (isDemo) return MOCK_USER as unknown as AuthUser;
   const session = await auth.api.getSession({ headers: await headers() });
   return session?.user ?? null;
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
 import { repo } from "@/lib/repo";
-import { DEMO_TENANT } from "@/demo/seed-data";
+import { DEMO_TENANT, DEMO_SCHEDULES } from "@/demo/seed-data";
 import ScheduleManager, { type StaffScheduleRow } from "./schedule-manager";
 
 export const metadata: Metadata = { title: "Lịch làm việc — Booking Platform" };
@@ -24,7 +24,7 @@ export default async function SchedulePage() {
         }))
         .map((row) => ({
           ...row,
-          schedules: (DEMO_SCHEDULES ?? [])
+          schedules: DEMO_SCHEDULES
             .filter((sch) => sch.staffId === row.id && sch.active)
             .map((sch) => ({
               dayOfWeek: sch.dayOfWeek,

@@ -244,7 +244,7 @@ function StaffScheduleCard({ staff, isDemo }: { staff: StaffScheduleRow; isDemo?
 }
 
 export default function ScheduleManager({
-  isDemo, staff }: { staff: StaffScheduleRow[] }) {
+  isDemo, staff }: { staff: StaffScheduleRow[]; isDemo?: boolean }) {
   return (
     <div className="space-y-6">
       <div>

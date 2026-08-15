@@ -2,24 +2,42 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth-guard";
-import { prisma } from "@/lib/prisma";
+import { repo } from "@/lib/repo";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import { formatDateVn, tenantNow } from "@/lib/datetime";
 
 export const metadata: Metadata = { title: "Tổng quan — Booking Platform" };
 
 export default async function DashboardHomePage() {
   const user = await requireRole("OWNER");
-  if (!user.tenantId) redirect("/settings");
-  const tenant = await prisma.tenant.findUnique({ where: { id: user.tenantId } });
-  if (!tenant) redirect("/settings");
+  const isDemo = process.env.DEMO_MODE === "true";
+  const tenantId = isDemo && user.tenantId === DEMO_TENANT.id ? DEMO_TENANT.id : user.tenantId;
+  const tenant = tenantId ? await repo.tenant.findById(tenantId) : null;
+  if (!tenant) {
+    const fallback = { name: "Cơ sở chưa cấu hình", timezone: "Asia/Ho_Chi_Minh", slug: "booking" } as const;
+    const today = tenantNow(fallback.timezone).date;
+    const stats = [
+      { label: "Lịch hẹn hôm nay", value: 0, hint: formatDateVn(today) },
+      { label: "Chờ xác nhận", value: 0, hint: "cần xử lý" },
+      { label: "Dịch vụ đang bán", value: 0, hint: "đang hoạt động" },
+      { label: "Nhân viên", value: 0, hint: "đang hoạt động" },
+    ];
+    const origin = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+    const publicUrl = `${origin}/booking/${fallback.slug}`;
+    return <DashboardStats tenantName={fallback.name} today={today} stats={stats} publicUrl={publicUrl} />;
+  }
 
   const today = tenantNow(tenant.timezone).date;
-  const [todayCount, pendingCount, servicesCount, staffCount] = await Promise.all([
-    prisma.booking.count({ where: { tenantId: tenant.id, date: today } }),
-    prisma.booking.count({ where: { tenantId: tenant.id, status: "PENDING" } }),
-    prisma.service.count({ where: { tenantId: tenant.id, isActive: true } }),
-    prisma.staff.count({ where: { tenantId: tenant.id, isActive: true } }),
+  const [todayBookings, allBookings, services, staffs] = await Promise.all([
+    repo.booking.listByTenantDate(tenant.id, today),
+    repo.booking.listByTenant(tenant.id),
+    repo.service.listByTenant(tenant.id),
+    repo.staff.listByTenant(tenant.id),
   ]);
+  const todayCount = todayBookings.length;
+  const pendingCount = allBookings.filter((b) => b.status === "PENDING").length;
+  const servicesCount = services.filter((s) => s.isActive).length;
+  const staffCount = staffs.filter((s) => s.isActive).length;
 
   const origin = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const publicUrl = `${origin}/booking/${tenant.slug}`;
@@ -31,14 +49,28 @@ export default async function DashboardHomePage() {
     { label: "Nhân viên", value: staffCount, hint: "đang hoạt động" },
   ];
 
+  return <DashboardStats tenantName={tenant.name} today={today} stats={stats} publicUrl={publicUrl} />;
+}
+
+function DashboardStats({
+  tenantName,
+  today,
+  stats,
+  publicUrl,
+}: {
+  tenantName: string;
+  today: string;
+  stats: { label: string; value: number; hint: string }[];
+  publicUrl: string;
+}) {
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold text-zinc-900">
-          Chào mừng trở lại, {user.name}
+          Chào mừng trở lại, {tenantName}
         </h1>
         <p className="mt-1 text-sm text-zinc-600">
-          Tổng quan hoạt động của {tenant.name} — {formatDateVn(today)}
+          Tổng quan hoạt động của {tenantName} — {formatDateVn(today)}
         </p>
       </div>
 

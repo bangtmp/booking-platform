@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole, homeForRole } from "@/lib/auth-guard";
-import { prisma } from "@/lib/prisma";
+import { repo } from "@/lib/repo";
 import { DEMO_TENANT } from "@/demo/seed-data";
 import { addDays, tenantNow } from "@/lib/datetime";
 import { requireOwnerScope } from "@/lib/tenant-scope";
@@ -55,9 +55,6 @@ export default async function BookingsPage({
   const role = user.role as "OWNER" | "STAFF";
   const isDemo = process.env.DEMO_MODE === "true";
 
-  // Role-aware tenancy scope. STAFF additionally resolves to their own staff
-  // row (email link), which is the carry-over Task 6 acceptance criterion:
-  // STAFF sees only their own bookings — enforced in this query AND per-action.
   let tenantId: string;
   let slug: string;
   let ownStaffId: string | null = null;
@@ -82,14 +79,11 @@ export default async function BookingsPage({
     }
     tenantId = scope.tenantId;
     ownStaffId = scope.staffId;
-    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { slug: true } });
-    slug = tenant?.slug ?? "";
+    const tenantRow = await repo.tenant.findById(tenantId);
+    slug = tenantRow?.slug ?? "";
   }
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: tenantId },
-    select: { slug: true, confirmMode: true, timezone: true },
-  });
+  const tenant = await repo.tenant.findById(tenantId);
   if (!tenant || tenant.slug !== slug) redirect(homeForRole(role));
 
   const params = await searchParams;
@@ -108,45 +102,25 @@ export default async function BookingsPage({
     };
   });
 
-  const staffWhere = { tenantId, ...(ownStaffId ? { id: ownStaffId } : {}) };
   const [staffs, schedules, bookings] = await Promise.all([
-    prisma.staff.findMany({
-      where: staffWhere,
-      select: { id: true, name: true, isActive: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.schedule.findMany({
-      where: { tenantId },
-      select: { staffId: true, dayOfWeek: true, active: true },
-    }),
-    prisma.booking.findMany({
-      where: {
-        tenantId,
-        date: { gte: weekStart, lte: weekEnd },
-        ...(ownStaffId ? { staffId: ownStaffId } : {}),
-      },
-      select: {
-        id: true,
-        staffId: true,
-        date: true,
-        startTime: true,
-        endTime: true,
-        status: true,
-        customerName: true,
-        service: { select: { name: true } },
-      },
-      orderBy: [{ date: "asc" }, { startTime: "asc" }],
-    }),
+    repo.staff.listByTenant(tenantId),
+    repo.schedule.listByTenant(tenantId),
+    repo.booking.listByTenant(tenantId),
   ]);
 
-  // Closed days for each staff: no row OR row.active === false (the schedule
-  // editor's invariant is "no row = closed").
+  const filteredStaffs = staffs.filter((s) => (ownStaffId ? s.id === ownStaffId : true));
+  const filteredBookings = bookings.filter((b) => {
+    const inWeek = b.date >= weekStart && b.date <= weekEnd;
+    const staffMatch = ownStaffId ? b.staffId === ownStaffId : true;
+    return inWeek && staffMatch;
+  });
+
   const scheduleByStaff: Record<string, Map<number, boolean>> = {};
   for (const s of schedules) {
     (scheduleByStaff[s.staffId] ??= new Map()).set(s.dayOfWeek, s.active);
   }
   const closedDays: Record<string, number[]> = {};
-  for (const staff of staffs) {
+  for (const staff of filteredStaffs) {
     const map = scheduleByStaff[staff.id];
     const closed: number[] = [];
     for (let dow = 0; dow <= 6; dow++) {
@@ -158,8 +132,17 @@ export default async function BookingsPage({
   return (
     <WeekCalendar
       days={days}
-      staffs={staffs}
-      bookings={bookings}
+      staffs={filteredStaffs.map((s) => ({ id: s.id, name: s.name, isActive: s.isActive }))}
+      bookings={filteredBookings.map((b) => ({
+        id: b.id,
+        staffId: b.staffId,
+        date: b.date,
+        startTime: b.startTime,
+        endTime: b.endTime,
+        status: b.status,
+        customerName: b.customerName,
+        service: { name: "" },
+      }))}
       closedDays={closedDays}
       weekStart={weekStart}
       confirmMode={tenant.confirmMode}

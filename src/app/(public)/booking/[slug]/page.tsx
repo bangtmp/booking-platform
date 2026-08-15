@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { DEMO_TENANT, DEMO_SCHEDULES } from "@/demo/seed-data";
+import { repo } from "@/lib/repo";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import BookingFlow from "./booking-flow";
 
 export async function generateMetadata({
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const tenant = await prisma.tenant.findUnique({ where: { slug } });
+  const tenant = await repo.tenant.findBySlug(slug);
   if (!tenant) return { title: "Đặt lịch" };
   return {
     title: `Đặt lịch — ${tenant.name}`,
@@ -24,17 +24,14 @@ export default async function BookingPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const isDemo = process.env.DEMO_MODE === "true";
-  const tenant = isDemo && slug === DEMO_TENANT.slug
-    ? DEMO_TENANT
-    : await prisma.tenant.findUnique({ where: { slug } });
+  const tenant = await repo.tenant.findBySlug(slug);
   if (!tenant) notFound();
 
   const tenantId = tenant.id;
   const [services, staffRows, staffSchedules] = await Promise.all([
     repo.service.listByTenant(tenantId),
     repo.staff.listByTenant(tenantId),
-    repo.schedule.listByTenantStaff(tenantId, ""),
+    repo.schedule.listByTenant(tenantId),
   ]);
 
   const activeServices = services

@@ -1,21 +1,22 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { repo } from "@/lib/repo";
+import { DEMO_TENANT } from "@/demo/seed-data";
 import { formatPriceVn } from "@/lib/datetime";
 
-const DEMO_TENANT_SLUG = "demo";
+const DEMO_TENANT_SLUG = DEMO_TENANT.slug;
 
 type Service = { id: string; name: string; price: string; durationMin: number };
 
 async function getDemoServices(): Promise<Service[]> {
   try {
-    const tenant = await prisma.tenant.findUnique({ where: { slug: DEMO_TENANT_SLUG } });
+    const tenant = await repo.tenant.findBySlug(DEMO_TENANT_SLUG);
     if (!tenant) return [];
-    const rows = await prisma.service.findMany({
-      where: { tenantId: tenant.id, isActive: true },
-      orderBy: { price: "asc" },
-      take: 3,
-    });
-    return rows.map((s) => ({ id: s.id, name: s.name, price: s.price.toString(), durationMin: s.durationMin }));
+    const rows = await repo.service.listByTenant(tenant.id);
+    return rows
+      .filter((s) => s.isActive)
+      .sort((a, b) => a.price - b.price)
+      .slice(0, 3)
+      .map((s) => ({ id: s.id, name: s.name, price: String(s.price), durationMin: s.durationMin }));
   } catch {
     return [];
   }

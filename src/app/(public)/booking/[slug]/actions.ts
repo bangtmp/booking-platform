@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { repo } from "@/lib/repo";
 import {
   addMinutes,
   getDaySlots,
@@ -103,8 +104,8 @@ function filterPastSlots(slots: string[], date: string, timeZone: string): strin
 
 async function loadServiceAndStaff(tenantId: string, serviceId: string, staffId: string) {
   const [service, staff] = await Promise.all([
-    prisma.service.findFirst({ where: { tenantId, id: serviceId, isActive: true } }),
-    prisma.staff.findFirst({ where: { tenantId, id: staffId, isActive: true } }),
+    repo.service.findActive(tenantId, serviceId),
+    repo.staff.findActive(tenantId, staffId),
   ]);
   return { service, staff };
 }
@@ -118,7 +119,7 @@ export async function getAvailability(
   staffId: string,
   serviceId: string,
 ): Promise<GetAvailabilityResult> {
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  const tenant = await repo.tenant.findBySlug(tenantSlug);
   if (!tenant) return { ok: false, error: "Cơ sở không tồn tại." };
   const { service, staff } = await loadServiceAndStaff(tenant.id, serviceId, staffId);
   if (!service) return { ok: false, error: "Dịch vụ không tồn tại." };
@@ -128,10 +129,8 @@ export async function getAvailability(
   const dateRangeEnd = addDays(dateRangeStart, AVAILABILITY_WINDOW_DAYS - 1);
 
   const [schedules, bookings] = await Promise.all([
-    prisma.schedule.findMany({ where: { tenantId: tenant.id, staffId } }),
-    prisma.booking.findMany({
-      where: { tenantId: tenant.id, staffId, date: { gte: dateRangeStart, lte: dateRangeEnd } },
-    }),
+    repo.schedule.listByTenantStaff(tenant.id, staffId),
+    repo.booking.listByTenantStaffDateRange(tenant.id, staffId, dateRangeStart, dateRangeEnd),
   ]);
 
   const bookingsByDate: Record<string, BookingInput[]> = {};
@@ -170,15 +169,15 @@ export async function getAvailableSlots(
   date: string,
   serviceId: string,
 ): Promise<GetAvailableSlotsResult> {
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+  const tenant = await repo.tenant.findBySlug(tenantSlug);
   if (!tenant) return { ok: false, error: "Cơ sở không tồn tại." };
   const { service, staff } = await loadServiceAndStaff(tenant.id, serviceId, staffId);
   if (!service) return { ok: false, error: "Dịch vụ không tồn tại." };
   if (!staff) return { ok: false, error: "Nhân viên không tồn tại." };
 
   const [schedules, bookings] = await Promise.all([
-    prisma.schedule.findMany({ where: { tenantId: tenant.id, staffId } }),
-    prisma.booking.findMany({ where: { tenantId: tenant.id, staffId, date } }),
+    repo.schedule.listByTenantStaff(tenant.id, staffId),
+    repo.booking.listByTenantStaffDateRange(tenant.id, staffId, date, date),
   ]);
 
   const slots = filterPastSlots(
@@ -204,8 +203,8 @@ async function computeFreeSlots(
   timeZone: string,
 ): Promise<string[]> {
   const [schedules, bookings] = await Promise.all([
-    prisma.schedule.findMany({ where: { tenantId, staffId } }),
-    prisma.booking.findMany({ where: { tenantId, staffId, date } }),
+    repo.schedule.listByTenantStaff(tenantId, staffId),
+    repo.booking.listByTenantStaffDateRange(tenantId, staffId, date, date),
   ]);
   return filterPastSlots(
     getDaySlots({
